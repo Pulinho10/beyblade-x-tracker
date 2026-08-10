@@ -1,0 +1,20 @@
+BEYBLADE X BATTLE TRACKER — iOS / Android (PWA)
+
+ARQUIVOS
+- index.html: aplicativo
+- manifest.webmanifest: configuração de instalação
+- service-worker.js: suporte offline
+- icons/: ícones do app
+
+COMO TESTAR NO COMPUTADOR
+Abra index.html diretamente para usar a interface. O salvamento local funciona,
+mas a instalação PWA e o service worker exigem que o app seja servido por HTTP/HTTPS.
+
+COMO USAR NO CELULAR
+1. Publique esta pasta em um servidor HTTPS (GitHub Pages, Netlify, Cloudflare Pages etc.).
+2. iPhone/iPad: abra a URL no Safari > Compartilhar > Adicionar à Tela de Início.
+3. Android: abra a URL no Chrome > menu > Instalar app / Adicionar à tela inicial.
+
+DADOS
+Os registros continuam sendo armazenados localmente no navegador do dispositivo.
+Use Backup JSON regularmente para transferir dados entre aparelhos ou manter cópias.
