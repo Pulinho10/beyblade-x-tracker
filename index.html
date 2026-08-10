@@ -86,6 +86,18 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 .badge.training{background:#3b2f16;color:#ffd978;border:1px solid #806418}
 .badge.competitive{background:#123f5a;color:#8bdcff;border:1px solid #256f91}
 .scope-note{margin-top:8px}
+
+.collection-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.collection-box{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px}
+.collection-box h3{margin-top:0}
+.collection-list{margin-top:10px;min-height:34px}
+.collection-chip{display:inline-flex;align-items:center;gap:6px;background:#102236;border:1px solid #2b5473;padding:6px 8px;border-radius:999px}
+.collection-chip button{border:0;background:transparent;color:#ff9aaa;font-weight:900;cursor:pointer;padding:0 2px}
+@media(max-width:850px){
+  .collection-grid{grid-template-columns:1fr}
+  .collection-box .toolbar{display:grid;grid-template-columns:1fr auto}
+}
+
 </style>
 </head><body><div class="app">
 <div class="top"><div class="brand"><h1>⚡ Beyblade X — Battle Tracker</h1><p>Registro de partidas competitivas, treinos, combos e desempenho das peças.</p></div><div class="nav"><button data-tab="new" class="active">Nova batalha</button><button data-tab="history">Histórico</button><button data-tab="stats">Estatísticas</button><button data-tab="pieces">Peças</button></div></div>
@@ -97,7 +109,7 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 <div class="field w4"><label>Torneio / Evento</label><input id="tournament" placeholder="Ex.: Semanal Pimpou - 15/08/2026"></div>
 <div class="field w4"><label>Tipo de registro</label><select id="battleMode"><option value="Competitiva">Partida competitiva</option><option value="Treino">Batalha de treino</option></select><div class="hint">As estatísticas serão separadas por tipo.</div></div>
 <div class="field w2"><label>Jogo</label><input id="game" placeholder="1º JOGO"></div><div class="field w2"><label>Round</label><input id="round" type="number" min="1" value="1"></div><div class="field w4"><label>Adversário / Combo</label><input id="opponent" placeholder="Ex.: Wizard Rod 1-60 H"></div>
-<div class="field"><label>Lock Chip (opcional)</label><input id="lockChip" list="dl-lock" placeholder="CX"></div><div class="field"><label>Blade</label><input id="blade" list="dl-blade" placeholder="Selecione ou digite"></div><div class="field"><label>Assist Blade (opcional)</label><input id="assistBlade" list="dl-assist"></div><div class="field"><label>Ratchet</label><input id="ratchet" list="dl-ratchet"></div><div class="field"><label>Bit</label><input id="bit" list="dl-bit"></div>
+<div class="field"><label>Lock Chip (opcional)</label><input id="lockChip" list="dl-lock" placeholder="Selecione da coleção ou digite"></div><div class="field"><label>Blade</label><input id="blade" list="dl-blade" placeholder="Selecione da coleção ou digite"></div><div class="field"><label>Assist Blade (opcional)</label><input id="assistBlade" list="dl-assist" placeholder="Selecione da coleção ou digite"></div><div class="field"><label>Ratchet</label><input id="ratchet" list="dl-ratchet" placeholder="Selecione da coleção ou digite"></div><div class="field"><label>Bit</label><input id="bit" list="dl-bit" placeholder="Selecione da coleção ou digite"></div>
 <div class="field w4"><label>Resultado</label><div class="result-choice"><button id="winBtn" class="win active" type="button">✓ Vitória</button><button id="lossBtn" class="loss" type="button">✕ Derrota</button></div></div><div class="field w4"><label>Tipo de finalização</label><select id="finish"><option>Spin Finish</option><option>Over Finish</option><option>Burst Finish</option><option>Extreme Finish</option><option>Penalização</option></select><div id="finishText" class="hint">Vitória por Spin Finish</div></div><div class="field w2"><label>Pontos</label><input id="points" type="number" value="1" readonly></div>
 <div class="field w12"><label>Observações</label><textarea id="notes" placeholder="Lançamento, matchup, erro, ajuste de técnica, etc."></textarea></div></div>
 <div class="toolbar" style="margin-top:14px"><button class="btn primary" id="saveBtn">Salvar batalha</button><button class="btn ghost" id="clearBtn">Limpar campos</button><span id="saveMsg" class="hint"></span></div></div>
@@ -157,11 +169,109 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 <div class="card"><h2>Ranking de todas as peças utilizadas</h2><div class="toolbar"><select id="pieceRankingType"><option value="blade">Blades</option><option value="ratchet">Ratchets</option><option value="bit">Bits</option><option value="lockChip">Lock Chips</option><option value="assistBlade">Assist Blades</option></select><span class="hint">Ordenado por aproveitamento; peças com mais batalhas aparecem primeiro em empates.</span></div><div class="tablewrap"><table><thead><tr><th>Peça</th><th>Batalhas</th><th>Vitórias</th><th>Derrotas</th><th>Aproveitamento</th><th>Pontos</th><th>Spin V/D</th><th>Over V/D</th><th>Burst V/D</th><th>Extreme V/D</th></tr></thead><tbody id="pieceRankingBody"></tbody></table></div></div>
 <div class="stat-grid"><div class="card"><h3>Vitórias por finalização — geral</h3><div id="winFinish"></div></div><div class="card"><h3>Derrotas por finalização — geral</h3><div id="lossFinish"></div></div><div class="card"><h3>Desempenho por Blade</h3><div id="bladeStats"></div></div><div class="card"><h3>Desempenho por Ratchet</h3><div id="ratchetStats"></div></div><div class="card"><h3>Desempenho por Bit</h3><div id="bitStats"></div></div><div class="card"><h3>Desempenho por Lock/Assist</h3><div id="auxStats"></div></div></div></section>
 
-<section id="tab-pieces" class="hidden"><div class="card"><h2>Peças disponíveis</h2><p class="hint">Listas importadas da planilha. Nos campos de batalha você também pode digitar uma peça nova manualmente.</p><div id="pieceCols" class="piececols"></div></div></section>
+
+<section id="tab-pieces" class="hidden">
+<div class="card">
+<h2>Minha coleção</h2>
+<p class="hint">Cadastre aqui somente as peças que você possui. Elas aparecerão como sugestões prioritárias na tela Nova Batalha. Você ainda poderá digitar manualmente qualquer nome de peça.</p>
+<div class="collection-grid">
+  <div class="collection-box">
+    <h3>Lock Chips</h3>
+    <div class="toolbar"><input id="add-lockChip" placeholder="Nome do Lock Chip"><button class="btn primary" data-add-piece="lockChip">Adicionar</button></div>
+    <div id="collection-lockChip" class="chips collection-list"></div>
+  </div>
+  <div class="collection-box">
+    <h3>Blades</h3>
+    <div class="toolbar"><input id="add-blade" placeholder="Nome da Blade"><button class="btn primary" data-add-piece="blade">Adicionar</button></div>
+    <div id="collection-blade" class="chips collection-list"></div>
+  </div>
+  <div class="collection-box">
+    <h3>Assist Blades</h3>
+    <div class="toolbar"><input id="add-assistBlade" placeholder="Nome da Assist Blade"><button class="btn primary" data-add-piece="assistBlade">Adicionar</button></div>
+    <div id="collection-assistBlade" class="chips collection-list"></div>
+  </div>
+  <div class="collection-box">
+    <h3>Ratchets</h3>
+    <div class="toolbar"><input id="add-ratchet" placeholder="Nome do Ratchet"><button class="btn primary" data-add-piece="ratchet">Adicionar</button></div>
+    <div id="collection-ratchet" class="chips collection-list"></div>
+  </div>
+  <div class="collection-box">
+    <h3>Bits</h3>
+    <div class="toolbar"><input id="add-bit" placeholder="Nome do Bit"><button class="btn primary" data-add-piece="bit">Adicionar</button></div>
+    <div id="collection-bit" class="chips collection-list"></div>
+  </div>
+</div>
+</div>
+<div class="card">
+<h2>Catálogo de referência</h2>
+<p class="hint">Lista geral de peças importada da planilha. Use como referência para conferir nomes; não é necessário possuir todas.</p>
+<div id="pieceCols" class="piececols"></div>
+</div>
+</section>
+
 <datalist id="dl-lock"></datalist><datalist id="dl-blade"></datalist><datalist id="dl-assist"></datalist><datalist id="dl-ratchet"></datalist><datalist id="dl-bit"></datalist>
-<div class="footer">Battle Tracker local • dados armazenados via localStorage do navegador • faça backups periódicos em JSON/CSV</div></div>
+<div class="footer">Battle Tracker local • coleção e batalhas armazenadas neste dispositivo • faça backups periódicos em JSON/CSV</div></div>
 <script>
 const PIECES={"lockChips": ["Incêndio", "Hell's", "Wolf", "Pegasus", "Cerberus", "Bahamut", "Fox", "Ragna", "Unicorn", "Perseus", "Wizard", "Emperor"], "blades": ["Scythe Incendio", "Talon Ptera", "Roar Tyranno", "Claw Leon", "Keel Shark", "Sting Unicorn", "Cobalt Dragoon", "Soar Phoenix", "Reaper", "Shark Scale", "Tyranno Roar", "Brave", "Hunt", "Silver Wolf", "Hell's Hammer", "Blast", "Wizard Rod", "Dran Buster", "Flame", "Whale Wave", "Mummy Curse", "Clock Mirage", "Hover Wyvern", "Meteor Dragoon", "Valor Bison", "Impact Drake", "Golem Rock", "Samurai Saber", "Leon Crest", "Shinobi Shadow", "Bullet Griffon", "Flare", "Brush", "Dark", "Arc", "Might", "Dran Sword", "Gill Shark", "Mammoth Tusk", "Heaven's Ring", "Weiss Tiger", "Dran Dagger", "Samurai Calibur", "Viper Tail", "Shinobi Knife", "Hell's Chain", "Obsidian Shell", "Tricera Press", "Cowl Sphinx", "Wyvern Gale", "Crimson Garuda", "Tyranno Beat", "Aero Pegasus", "Peak Delta", "Break Blitz", "Flow Rage", "Helm Knight"], "assistBlades": ["Turn", "Jaggy", "Free", "Assault", "Wheel", "Odd", "Arc", "Zillion", "Heavy", "Round", "Erase", "Knuckle"], "ratchets": ["4-60", "3-80", "9-60", "5-60", "3-60", "5-60²", "2-60", "9-60²", "4-70", "4-50", "1-70", "3-60²", "0-60", "3-80²", "3-70", "5-70", "1-60", "5-80", "5-80²", "1-80", "0-80", "M-85", "3-85", "9-80", "2-80", "6-70", "7-55", "4-55", "6-60", "1-50", "7-60"], "bits": ["T", "B", "GF", "P", "LF", "GP", "C", "GF²", "K", "UF", "L", "GF³", "DB", "FB", "H", "TR", "DB²", "A", "WB", "E", "DS", "G", "HN", "N", "UN", "BS", "S", "GN", "Y", "WW", "LO", "O", "LR", "TP", "Q", "GR", "I", "R", "J", "V", "M"]};
+
+const COLLECTION_KEY='beyblade_x_collection_v1';
+const COLLECTION_TYPES=['lockChip','blade','assistBlade','ratchet','bit'];
+const PIECE_ARRAYS={lockChip:'lockChips',blade:'blades',assistBlade:'assistBlades',ratchet:'ratchets',bit:'bits'};
+let collection={lockChip:[],blade:[],assistBlade:[],ratchet:[],bit:[]};
+function loadCollection(){
+  try{
+    const raw=localStorage.getItem(COLLECTION_KEY);
+    if(raw){
+      const obj=JSON.parse(raw);
+      COLLECTION_TYPES.forEach(k=>collection[k]=Array.isArray(obj[k])?obj[k]:[]);
+    }
+  }catch(_){}
+}
+function saveCollection(){localStorage.setItem(COLLECTION_KEY,JSON.stringify(collection))}
+function normPieceName(v){return String(v||'').trim()}
+function addCollectionPiece(type,name){
+  name=normPieceName(name);
+  if(!name)return;
+  if(!collection[type].some(x=>x.toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'))){
+    collection[type].push(name);
+    collection[type].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    saveCollection();
+  }
+  renderCollection();
+  refreshBattleDatalists();
+}
+function removeCollectionPiece(type,name){
+  collection[type]=collection[type].filter(x=>x!==name);
+  saveCollection();
+  renderCollection();
+  refreshBattleDatalists();
+}
+function renderCollection(){
+  COLLECTION_TYPES.forEach(type=>{
+    const el=$('collection-'+type);
+    if(!el)return;
+    el.innerHTML=collection[type].length
+      ? collection[type].map(name=>`<span class="collection-chip">${esc(name)}<button type="button" title="Remover" onclick='removeCollectionPiece(${JSON.stringify(type)},${JSON.stringify(name)})'>×</button></span>`).join('')
+      : '<span class="hint">Nenhuma peça cadastrada.</span>';
+  });
+}
+function combinedSuggestions(type){
+  const ref=PIECES[PIECE_ARRAYS[type]]||[];
+  const own=collection[type]||[];
+  const seen=new Set();
+  return [...own,...ref].filter(x=>{
+    const k=x.toLocaleLowerCase('pt-BR');
+    if(seen.has(k))return false;
+    seen.add(k); return true;
+  });
+}
+function refreshBattleDatalists(){
+  options('dl-lock',combinedSuggestions('lockChip'));
+  options('dl-blade',combinedSuggestions('blade'));
+  options('dl-assist',combinedSuggestions('assistBlade'));
+  options('dl-ratchet',combinedSuggestions('ratchet'));
+  options('dl-bit',combinedSuggestions('bit'));
+}
 const SEED=[];
 const KEY='beybladeXBattleTracker_v1';
 let data=[]; let currentResult='Vitória';
@@ -280,9 +390,24 @@ function clearForm(){['lockChip','blade','assistBlade','ratchet','bit','opponent
 function addBattle(){if(!$('blade').value.trim()){alert('Selecione ou digite a Blade.');return} if(!$('ratchet').value.trim()||!$('bit').value.trim()){alert('Informe Ratchet e Bit.');return} const b={id:'b-'+Date.now(),createdAt:new Date().toISOString(),mode:$('battleMode').value,tournament:$('tournament').value.trim(),game:$('game').value.trim(),round:+$('round').value||1,lockChip:$('lockChip').value.trim(),blade:$('blade').value.trim(),assistBlade:$('assistBlade').value.trim(),ratchet:$('ratchet').value.trim(),bit:$('bit').value.trim(),opponent:$('opponent').value.trim(),result:currentResult,finish:$('finish').value,points:pointFor(currentResult,$('finish').value),notes:$('notes').value.trim(),source:'Aplicativo'};data.push(b);save();$('saveMsg').textContent='Batalha salva ✓';setTimeout(()=>$('saveMsg').textContent='',1800);clearForm();renderAll();}
 function dl(name,content,type){const blob=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function csv(){const cols=['mode','tournament','game','round','lockChip','blade','assistBlade','ratchet','bit','opponent','result','finish','points','notes'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';return '\ufeff'+[cols.join(';'),...data.map(b=>cols.map(c=>q(b[c])).join(';'))].join('\r\n')}
-function init(){load();options('dl-lock',PIECES.lockChips);options('dl-blade',PIECES.blades);options('dl-assist',PIECES.assistBlades);options('dl-ratchet',PIECES.ratchets);options('dl-bit',PIECES.bits);renderPieces();renderAll();updateResultUI();
+function init(){load();loadCollection();refreshBattleDatalists();renderPieces();renderCollection();renderAll();updateResultUI();
  document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');['new','history','stats','pieces'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==btn.dataset.tab));if(btn.dataset.tab==='history')renderHistory();if(btn.dataset.tab==='stats')renderStats()});
- $('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterMode','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('statsScope').onchange=renderStats;$('comboNameFilter').onchange=renderComboDetail;$('comboMinBattles').onchange=renderComboRanking;$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify(data,null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);if(!Array.isArray(v))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=v;save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
+ 
+ document.querySelectorAll('[data-add-piece]').forEach(btn=>btn.onclick=()=>{
+   const type=btn.dataset.addPiece;
+   const input=$('add-'+type);
+   addCollectionPiece(type,input.value);
+   input.value='';
+   input.focus();
+ });
+ COLLECTION_TYPES.forEach(type=>{
+   const input=$('add-'+type);
+   if(input) input.addEventListener('keydown',e=>{
+     if(e.key==='Enter'){e.preventDefault();addCollectionPiece(type,input.value);input.value='';}
+   });
+ });
+
+$('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterMode','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('statsScope').onchange=renderStats;$('comboNameFilter').onchange=renderComboDetail;$('comboMinBattles').onchange=renderComboRanking;$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify({battles:data,collection},null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);const battles=Array.isArray(v)?v:v.battles;if(!Array.isArray(battles))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=battles;if(v&&v.collection){COLLECTION_TYPES.forEach(k=>collection[k]=Array.isArray(v.collection[k])?v.collection[k]:[]);saveCollection();renderCollection();refreshBattleDatalists();}save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
 }
 init();
 </script>

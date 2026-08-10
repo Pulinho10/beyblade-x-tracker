@@ -26,3 +26,12 @@ Use Backup JSON periodicamente para preservar ou transferir seus dados.
 
 PWA / CELULAR
 Para instalação completa no iOS/Android, hospede a pasta em HTTPS.
+
+ATUALIZAÇÃO — MINHA COLEÇÃO
+Na aba Peças, o usuário pode cadastrar e remover manualmente as peças que possui.
+Essas peças aparecem primeiro nas sugestões da tela Nova Batalha.
+Os campos continuam aceitando texto livre, então também é possível registrar uma
+peça que ainda não esteja cadastrada.
+
+O Backup JSON agora inclui tanto o histórico de batalhas quanto a coleção pessoal.
+Backups antigos contendo apenas uma lista de batalhas continuam compatíveis.
