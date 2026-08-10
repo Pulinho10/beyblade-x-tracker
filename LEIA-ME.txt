@@ -1,27 +1,28 @@
-BEYBLADE X BATTLE TRACKER — iOS / Android (PWA)
+BEYBLADE X BATTLE TRACKER — VERSÃO GERAL
 
-ARQUIVOS
-- index.html: aplicativo
-- manifest.webmanifest: configuração de instalação
-- service-worker.js: suporte offline
-- icons/: ícones do app
+Esta versão inicia com o histórico vazio.
 
-COMO TESTAR NO COMPUTADOR
-Abra index.html diretamente para usar a interface. O salvamento local funciona,
-mas a instalação PWA e o service worker exigem que o app seja servido por HTTP/HTTPS.
+TIPOS DE REGISTRO
+- Partida competitiva
+- Batalha de treino
 
-COMO USAR NO CELULAR
-1. Publique esta pasta em um servidor HTTPS (GitHub Pages, Netlify, Cloudflare Pages etc.).
-2. iPhone/iPad: abra a URL no Safari > Compartilhar > Adicionar à Tela de Início.
-3. Android: abra a URL no Chrome > menu > Instalar app / Adicionar à tela inicial.
+ESTATÍSTICAS
+Na aba Estatísticas, use "Escopo das estatísticas" para alternar entre:
+- Geral — competitivas + treino
+- Somente partidas competitivas
+- Somente batalhas de treino
+
+O filtro afeta:
+- KPIs gerais
+- vitórias e derrotas por finalização
+- estatísticas por peça
+- ranking de peças
+- estatísticas por combo
+- ranking de combos
 
 DADOS
-Os registros continuam sendo armazenados localmente no navegador do dispositivo.
-Use Backup JSON regularmente para transferir dados entre aparelhos ou manter cópias.
+Os registros ficam armazenados localmente no navegador/dispositivo.
+Use Backup JSON periodicamente para preservar ou transferir seus dados.
 
-ATUALIZAÇÃO — ESTATÍSTICAS POR COMBO
-A área Estatísticas agora agrupa automaticamente cada combinação exata registrada
-(Lock Chip + Blade + Assist Blade + Ratchet + Bit). Para registros históricos que
-não possuem Lock Chip ou Assist Blade, o combo é agrupado com Blade + Ratchet + Bit.
-São exibidos batalhas, vitórias, derrotas, aproveitamento, pontos, média de pontos
-e vitórias/derrotas por tipo de finalização.
+PWA / CELULAR
+Para instalação completa no iOS/Android, hospede a pasta em HTTPS.

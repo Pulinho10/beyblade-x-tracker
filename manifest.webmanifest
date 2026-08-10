@@ -1,7 +1,7 @@
 {
-  "name": "Beyblade X Battle Tracker",
+  "name": "Beyblade X Battle Tracker — Geral",
   "short_name": "Beyblade X",
-  "description": "Registro de batalhas, torneios e estatísticas de peças de Beyblade X.",
+  "description": "Registro de partidas competitivas e batalhas de treino com estatísticas separadas.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
