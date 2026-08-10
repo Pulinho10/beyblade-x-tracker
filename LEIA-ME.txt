@@ -18,3 +18,10 @@ COMO USAR NO CELULAR
 DADOS
 Os registros continuam sendo armazenados localmente no navegador do dispositivo.
 Use Backup JSON regularmente para transferir dados entre aparelhos ou manter cópias.
+
+ATUALIZAÇÃO — ESTATÍSTICAS POR COMBO
+A área Estatísticas agora agrupa automaticamente cada combinação exata registrada
+(Lock Chip + Blade + Assist Blade + Ratchet + Bit). Para registros históricos que
+não possuem Lock Chip ou Assist Blade, o combo é agrupado com Blade + Ratchet + Bit.
+São exibidos batalhas, vitórias, derrotas, aproveitamento, pontos, média de pontos
+e vitórias/derrotas por tipo de finalização.

@@ -74,6 +74,14 @@ input,select,textarea{font-size:16px!important;min-height:44px}
   .kpi .n{font-size:22px}
 }
 
+
+.combo-stats-card{border-color:#244b70}
+.combo-stats-card h2{display:flex;align-items:center;gap:8px}
+@media(max-width:850px){
+  .combo-stats-card .piece-stat-controls{margin-bottom:8px}
+  #comboNameFilter{width:100%}
+}
+
 </style>
 </head><body><div class="app">
 <div class="top"><div class="brand"><h1>⚡ Beyblade X — Battle Tracker</h1><p>Registro rápido de torneios, rounds e desempenho das peças.</p></div><div class="nav"><button data-tab="new" class="active">Nova batalha</button><button data-tab="history">Histórico</button><button data-tab="stats">Estatísticas</button><button data-tab="pieces">Peças</button></div></div>
@@ -94,6 +102,36 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 
 <section id="tab-stats" class="hidden">
 <div class="kpis" id="statsKpis"></div>
+
+<div class="card combo-stats-card">
+<h2>Estatísticas por combo</h2>
+<p class="hint">Cada combo é identificado pela combinação exata das peças registradas na partida. Lock Chip e Assist Blade entram no cálculo quando forem informados; nos rounds históricos, o combo é formado pelas peças disponíveis no registro.</p>
+<div class="piece-stat-controls">
+  <div class="field"><label>Combo</label><select id="comboNameFilter"></select></div>
+</div>
+<div id="comboDetailKpis" class="mini-kpis"></div>
+<div class="detail-grid">
+  <div><h3>Vitórias deste combo</h3><div id="comboWinFinish"></div></div>
+  <div><h3>Derrotas deste combo</h3><div id="comboLossFinish"></div></div>
+</div>
+</div>
+<div class="card">
+<h2>Ranking de combos utilizados</h2>
+<div class="toolbar">
+  <select id="comboMinBattles">
+    <option value="1">Mín. 1 batalha</option>
+    <option value="2">Mín. 2 batalhas</option>
+    <option value="3">Mín. 3 batalhas</option>
+    <option value="5">Mín. 5 batalhas</option>
+    <option value="10">Mín. 10 batalhas</option>
+  </select>
+  <span class="hint">Ordenado por aproveitamento; em caso de empate, aparecem primeiro os combos mais utilizados.</span>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th>Combo</th><th>Batalhas</th><th>Vitórias</th><th>Derrotas</th><th>Aproveitamento</th><th>Pontos</th><th>Pontos/Batalha</th><th>Spin V/D</th><th>Over V/D</th><th>Burst V/D</th><th>Extreme V/D</th></tr></thead>
+<tbody id="comboRankingBody"></tbody>
+</table></div>
+</div>
 <div class="card"><h2>Estatísticas por peça utilizada</h2><p class="hint">Selecione o tipo de peça e uma peça específica para ver seu desempenho isolado. Os números consideram somente rounds em que essa peça foi registrada no seu combo.</p>
 <div class="piece-stat-controls">
 <div class="field"><label>Tipo de peça</label><select id="pieceTypeFilter"><option value="blade">Blade</option><option value="ratchet">Ratchet</option><option value="bit">Bit</option><option value="lockChip">Lock Chip</option><option value="assistBlade">Assist Blade</option></select></div>
@@ -135,7 +173,87 @@ function refreshPieceNames(){const key=$('pieceTypeFilter').value;const rows=pie
 function renderPieceDetail(){const key=$('pieceTypeFilter').value,name=$('pieceNameFilter').value;const rows=pieceRows(key);const x=rows.find(r=>r.name===name);if(!x){$('pieceDetailKpis').innerHTML='<div class="empty" style="grid-column:1/-1">Nenhuma batalha registrada com este tipo de peça.</div>';$('pieceWinFinish').innerHTML='<div class="empty">Sem dados.</div>';$('pieceLossFinish').innerHTML='<div class="empty">Sem dados.</div>';return}const rate=x.n?Math.round(x.w/x.n*100):0;const avg=x.n?(x.points/x.n).toFixed(2):'0.00';const vals=[['Batalhas',x.n,''],['Vitórias',x.w,'winText'],['Derrotas',x.l,'lossText'],['Aproveitamento',rate+'%',''],['Pontos',x.points,''],['Pontos/Batalha',avg,'']];$('pieceDetailKpis').innerHTML=vals.map(([l,n,c])=>`<div class="mini-kpi"><div class="n ${c}">${n}</div><div class="l">${l}</div></div>`).join('');let wf={},lf={};Object.entries(x.finish).forEach(([f,v])=>{if(v.w)wf[f]=v.w;if(v.l)lf[f]=v.l});bars('pieceWinFinish',wf,x.w);bars('pieceLossFinish',lf,x.l)}
 function renderPieceRanking(){const key=$('pieceRankingType').value;const rows=pieceRows(key).sort((a,b)=>((b.w/b.n)-(a.w/a.n))||(b.n-a.n)||a.name.localeCompare(b.name,'pt-BR'));const cell=(x,f)=>`${x.finish[f]?.w||0} / ${x.finish[f]?.l||0}`;$('pieceRankingBody').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${x.n}</td><td class="winText">${x.w}</td><td class="lossText">${x.l}</td><td><b>${Math.round(x.w/x.n*100)}%</b></td><td>${x.points}</td><td>${cell(x,'Spin Finish')}</td><td>${cell(x,'Over Finish')}</td><td>${cell(x,'Burst Finish')}</td><td>${cell(x,'Extreme Finish')}</td></tr>`).join(''):`<tr><td colspan="10" class="empty">Nenhuma peça deste tipo foi registrada nas batalhas.</td></tr>`}
 function renderAuxPerformance(){const lock=pieceRows('lockChip').length,assist=pieceRows('assistBlade').length;if(!lock&&!assist){$('auxStats').innerHTML='<div class="empty">Os 59 rounds históricos não discriminavam Lock Chip/Assist Blade. Novos registros feitos no app passarão a gerar estas estatísticas.</div>';return}let html='';if(lock){html+='<div class="hint"><b>Lock Chips</b></div>';const tmp=$('auxStats');}const combined=[];pieceRows('lockChip').forEach(x=>combined.push(['Lock: '+x.name,x]));pieceRows('assistBlade').forEach(x=>combined.push(['Assist: '+x.name,x]));combined.sort((a,b)=>(b[1].w/b[1].n)-(a[1].w/a[1].n));$('auxStats').innerHTML=combined.slice(0,12).map(([k,v])=>{const pc=Math.round(v.w/v.n*100);return `<div class="barrow"><span title="${esc(k)}">${esc(k)}</span><div class="bar"><i style="width:${pc}%"></i></div><b>${pc}%</b></div>`}).join('')}
-function renderStats(){renderKpis('statsKpis');let wf={},lf={};data.forEach(b=>{let o=b.result==='Vitória'?wf:lf;o[b.finish]=(o[b.finish]||0)+1});bars('winFinish',wf,data.filter(x=>x.result==='Vitória').length);bars('lossFinish',lf,data.filter(x=>x.result==='Derrota').length);performance('bladeStats','blade');performance('ratchetStats','ratchet');performance('bitStats','bit');renderAuxPerformance();refreshPieceNames();renderPieceRanking()}
+
+function comboKey(b){
+  const parts=[
+    ['Lock',b.lockChip],
+    ['Blade',b.blade],
+    ['Assist',b.assistBlade],
+    ['Ratchet',b.ratchet],
+    ['Bit',b.bit]
+  ].filter(x=>(x[1]||'').trim());
+  return parts.map(x=>x[0]+': '+String(x[1]).trim()).join(' | ');
+}
+function comboLabelFromKey(key){
+  return key.split(' | ').map(x=>x.replace(/^(Lock|Blade|Assist|Ratchet|Bit): /,'')).join(' • ');
+}
+function comboRows(){
+  const m={};
+  data.forEach(b=>{
+    const key=comboKey(b);
+    if(!key || !(b.blade||'').trim() || !(b.ratchet||'').trim() || !(b.bit||'').trim()) return;
+    if(!m[key]) m[key]={key,name:comboLabelFromKey(key),n:0,w:0,l:0,points:0,finish:{},parts:{
+      lockChip:(b.lockChip||'').trim(),blade:(b.blade||'').trim(),assistBlade:(b.assistBlade||'').trim(),
+      ratchet:(b.ratchet||'').trim(),bit:(b.bit||'').trim()
+    }};
+    const x=m[key];
+    x.n++;
+    x.points+=(+b.points||0);
+    if(b.result==='Vitória') x.w++;
+    else if(b.result==='Derrota') x.l++;
+    const f=b.finish||'Sem tipo';
+    x.finish[f]??={w:0,l:0};
+    if(b.result==='Vitória') x.finish[f].w++;
+    else if(b.result==='Derrota') x.finish[f].l++;
+  });
+  return Object.values(m);
+}
+function refreshComboNames(){
+  const rows=comboRows().sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name,'pt-BR'));
+  const prev=$('comboNameFilter').value;
+  $('comboNameFilter').innerHTML=rows.length
+    ? rows.map(x=>`<option value="${esc(x.key)}">${esc(x.name)} — ${x.n} batalha${x.n===1?'':'s'}</option>`).join('')
+    : '<option value="">Sem combos registrados</option>';
+  if(rows.some(x=>x.key===prev)) $('comboNameFilter').value=prev;
+  renderComboDetail();
+}
+function renderComboDetail(){
+  const key=$('comboNameFilter').value;
+  const x=comboRows().find(r=>r.key===key);
+  if(!x){
+    $('comboDetailKpis').innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum combo completo registrado.</div>';
+    $('comboWinFinish').innerHTML='<div class="empty">Sem dados.</div>';
+    $('comboLossFinish').innerHTML='<div class="empty">Sem dados.</div>';
+    return;
+  }
+  const rate=x.n?Math.round(x.w/x.n*100):0;
+  const avg=x.n?(x.points/x.n).toFixed(2):'0.00';
+  const vals=[
+    ['Batalhas',x.n,''],['Vitórias',x.w,'winText'],['Derrotas',x.l,'lossText'],
+    ['Aproveitamento',rate+'%',''],['Pontos',x.points,''],['Pontos/Batalha',avg,'']
+  ];
+  $('comboDetailKpis').innerHTML=vals.map(([l,n,c])=>`<div class="mini-kpi"><div class="n ${c}">${n}</div><div class="l">${l}</div></div>`).join('');
+  let wf={},lf={};
+  Object.entries(x.finish).forEach(([f,v])=>{if(v.w)wf[f]=v.w;if(v.l)lf[f]=v.l});
+  bars('comboWinFinish',wf,x.w);
+  bars('comboLossFinish',lf,x.l);
+}
+function renderComboRanking(){
+  const min=+$('comboMinBattles').value||1;
+  const rows=comboRows().filter(x=>x.n>=min).sort((a,b)=>((b.w/b.n)-(a.w/a.n))||(b.n-a.n)||a.name.localeCompare(b.name,'pt-BR'));
+  const cell=(x,f)=>`${x.finish[f]?.w||0} / ${x.finish[f]?.l||0}`;
+  $('comboRankingBody').innerHTML=rows.length?rows.map(x=>{
+    const rate=Math.round(x.w/x.n*100);
+    const avg=(x.points/x.n).toFixed(2);
+    return `<tr>
+      <td><b>${esc(x.name)}</b></td><td>${x.n}</td><td class="winText">${x.w}</td><td class="lossText">${x.l}</td>
+      <td><b>${rate}%</b></td><td>${x.points}</td><td>${avg}</td>
+      <td>${cell(x,'Spin Finish')}</td><td>${cell(x,'Over Finish')}</td><td>${cell(x,'Burst Finish')}</td><td>${cell(x,'Extreme Finish')}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="11" class="empty">Nenhum combo atende ao filtro de batalhas mínimas.</td></tr>`;
+}
+
+function renderStats(){renderKpis('statsKpis');refreshComboNames();renderComboRanking();let wf={},lf={};data.forEach(b=>{let o=b.result==='Vitória'?wf:lf;o[b.finish]=(o[b.finish]||0)+1});bars('winFinish',wf,data.filter(x=>x.result==='Vitória').length);bars('lossFinish',lf,data.filter(x=>x.result==='Derrota').length);performance('bladeStats','blade');performance('ratchetStats','ratchet');performance('bitStats','bit');renderAuxPerformance();refreshPieceNames();renderPieceRanking()}
 function renderAll(){renderKpis('quickKpis');renderHistory();renderStats();}
 function clearForm(){['lockChip','blade','assistBlade','ratchet','bit','opponent','notes'].forEach(x=>$(x).value='');$('round').value=(+($('round').value||0))+1;currentResult='Vitória';$('finish').value='Spin Finish';updateResultUI();}
 function addBattle(){if(!$('blade').value.trim()){alert('Selecione ou digite a Blade.');return} if(!$('ratchet').value.trim()||!$('bit').value.trim()){alert('Informe Ratchet e Bit.');return} const b={id:'b-'+Date.now(),createdAt:new Date().toISOString(),tournament:$('tournament').value.trim(),game:$('game').value.trim(),round:+$('round').value||1,lockChip:$('lockChip').value.trim(),blade:$('blade').value.trim(),assistBlade:$('assistBlade').value.trim(),ratchet:$('ratchet').value.trim(),bit:$('bit').value.trim(),opponent:$('opponent').value.trim(),result:currentResult,finish:$('finish').value,points:pointFor(currentResult,$('finish').value),notes:$('notes').value.trim(),source:'Aplicativo'};data.push(b);save();$('saveMsg').textContent='Batalha salva ✓';setTimeout(()=>$('saveMsg').textContent='',1800);clearForm();renderAll();}
@@ -143,7 +261,7 @@ function dl(name,content,type){const blob=new Blob([content],{type});const a=doc
 function csv(){const cols=['tournament','game','round','lockChip','blade','assistBlade','ratchet','bit','opponent','result','finish','points','notes'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';return '\ufeff'+[cols.join(';'),...data.map(b=>cols.map(c=>q(b[c])).join(';'))].join('\r\n')}
 function init(){load();options('dl-lock',PIECES.lockChips);options('dl-blade',PIECES.blades);options('dl-assist',PIECES.assistBlades);options('dl-ratchet',PIECES.ratchets);options('dl-bit',PIECES.bits);renderPieces();renderAll();updateResultUI();
  document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');['new','history','stats','pieces'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==btn.dataset.tab));if(btn.dataset.tab==='history')renderHistory();if(btn.dataset.tab==='stats')renderStats()});
- $('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify(data,null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);if(!Array.isArray(v))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=v;save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
+ $('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('comboNameFilter').onchange=renderComboDetail;$('comboMinBattles').onchange=renderComboRanking;$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify(data,null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);if(!Array.isArray(v))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=v;save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
 }
 init();
 </script>
