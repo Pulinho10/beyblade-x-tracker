@@ -128,16 +128,16 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 <select id="lockChipSelect"><option value="">— Nenhum —</option></select>
 <input id="lockChipManual" class="hidden" placeholder="Digite o Lock Chip">
 </div><div class="field"><label>Blade</label>
-<select id="bladeSelect"><option value="">Selecione</option></select>
+<select id="bladeSelect"><option value="">Selecione</option></select><div class="hint">Organizadas por Ataque, Defesa, Resistência e Equilíbrio. ★ = sua coleção.</div>
 <input id="bladeManual" class="hidden" placeholder="Digite a Blade">
 </div><div class="field"><label>Assist Blade (opcional)</label>
 <select id="assistBladeSelect"><option value="">— Nenhuma —</option></select>
 <input id="assistBladeManual" class="hidden" placeholder="Digite a Assist Blade">
 </div><div class="field"><label>Ratchet</label>
-<select id="ratchetSelect"><option value="">Selecione</option></select>
+<select id="ratchetSelect"><option value="">Selecione</option></select><div class="hint">Ordenadas por altura e, depois, pelo número de lados. ★ = sua coleção.</div>
 <input id="ratchetManual" class="hidden" placeholder="Digite o Ratchet">
 </div><div class="field"><label>Bit</label>
-<select id="bitSelect"><option value="">Selecione</option></select>
+<select id="bitSelect"><option value="">Selecione</option></select><div class="hint">Organizados por Ataque, Defesa, Resistência e Equilíbrio. ★ = sua coleção.</div>
 <input id="bitManual" class="hidden" placeholder="Digite o Bit">
 </div>
 <div class="field w4"><label>Resultado</label><div class="result-choice"><button id="winBtn" class="win active" type="button">✓ Vitória</button><button id="lossBtn" class="loss" type="button">✕ Derrota</button></div></div><div class="field w4"><label>Tipo de finalização</label><select id="finish"><option>Spin Finish</option><option>Over Finish</option><option>Burst Finish</option><option>Extreme Finish</option><option>Penalização</option></select><div id="finishText" class="hint">Vitória por Spin Finish</div></div><div class="field w2"><label>Pontos</label><input id="points" type="number" value="1" readonly></div>
@@ -247,6 +247,9 @@ const PIECES={"lockChips": ["Incêndio", "Hell's", "Wolf", "Pegasus", "Cerberus"
 const COLLECTION_KEY='beyblade_x_collection_v1';
 const COLLECTION_TYPES=['lockChip','blade','assistBlade','ratchet','bit'];
 const PIECE_ARRAYS={lockChip:'lockChips',blade:'blades',assistBlade:'assistBlades',ratchet:'ratchets',bit:'bits'};
+const BLADE_CATEGORIES={"Scythe Incendio":"Equilíbrio","Talon Ptera":"Resistência","Roar Tyranno":"Ataque","Claw Leon":"Equilíbrio","Keel Shark":"Ataque","Sting Unicorn":"Equilíbrio","Cobalt Dragoon":"Ataque","Soar Phoenix":"Ataque","Reaper":"Equilíbrio","Shark Scale":"Ataque","Tyranno Roar":"Ataque","Brave":"Ataque","Hunt":"Resistência","Silver Wolf":"Resistência","Hell's Hammer":"Equilíbrio","Blast":"Ataque","Wizard Rod":"Resistência","Dran Buster":"Ataque","Flame":"Resistência","Whale Wave":"Equilíbrio","Mummy Curse":"Defesa","Clock Mirage":"Resistência","Hover Wyvern":"Defesa","Meteor Dragoon":"Ataque","Valor Bison":"Resistência","Impact Drake":"Ataque","Golem Rock":"Defesa","Samurai Saber":"Ataque","Leon Crest":"Defesa","Shinobi Shadow":"Defesa","Bullet Griffon":"Equilíbrio","Flare":"Defesa","Brush":"Ataque","Dark":"Defesa","Arc":"Resistência","Might":"Equilíbrio","Dran Sword":"Ataque","Gill Shark":"Resistência","Mammoth Tusk":"Equilíbrio","Heaven's Ring":"Defesa","Weiss Tiger":"Equilíbrio","Dran Dagger":"Ataque","Samurai Calibur":"Equilíbrio","Viper Tail":"Resistência","Shinobi Knife":"Defesa","Hell's Chain":"Equilíbrio","Obsidian Shell":"Defesa","Tricera Press":"Defesa","Cowl Sphinx":"Defesa","Wyvern Gale":"Resistência","Crimson Garuda":"Equilíbrio","Tyranno Beat":"Ataque","Aero Pegasus":"Ataque","Peak Delta":"Equilíbrio","Break Blitz":"Ataque","Flow Rage":"Resistência","Helm Knight":"Defesa"};
+const BIT_CATEGORIES={"T":"Equilíbrio","B":"Resistência","GF":"Ataque","P":"Equilíbrio","LF":"Ataque","GP":"Equilíbrio","C":"Ataque","GF²":"Ataque","K":"Equilíbrio","UF":"Ataque","L":"Ataque","GF³":"Ataque","DB":"Resistência","FB":"Resistência","H":"Equilíbrio","TR":"Ataque","DB²":"Resistência","A":"Ataque","WB":"Resistência","E":"Equilíbrio","DS":"Defesa","G":"Resistência","HN":"Defesa","N":"Defesa","UN":"Defesa","BS":"Defesa","S":"Defesa","GN":"Defesa","Y":"Resistência","WW":"Defesa","LO":"Resistência","O":"Resistência","LR":"Ataque","TP":"Equilíbrio","Q":"Ataque","GR":"Ataque","I":"Ataque","R":"Ataque","J":"Ataque","V":"Ataque","M":"Equilíbrio"};
+const TYPE_ORDER=['Ataque','Defesa','Resistência','Equilíbrio','Não classificado'];
 let collection={lockChip:[],blade:[],assistBlade:[],ratchet:[],bit:[]};
 function loadCollection(){
   try{
@@ -301,6 +304,23 @@ function selectPieceValue(type){
   if(!sel)return '';
   return sel.value==='__manual__' ? ($(type+'Manual')?.value||'').trim() : sel.value.trim();
 }
+function pieceCategory(type,name){
+  if(type==='blade') return BLADE_CATEGORIES[name]||'Não classificado';
+  if(type==='bit') return BIT_CATEGORIES[name]||'Não classificado';
+  return '';
+}
+function ratchetSortKey(name){
+  const clean=String(name||'').trim().replace(/[²³⁴⁵⁶⁷⁸⁹]/g,'');
+  const m=clean.match(/^([0-9]+|M)-([0-9]+)/i);
+  if(!m)return [999,999,clean];
+  const height=+m[2];
+  const sides=/^\d+$/.test(m[1])?+m[1]:99;
+  return [height,sides,clean];
+}
+function compareRatchets(a,b){
+  const A=ratchetSortKey(a),B=ratchetSortKey(b);
+  return A[0]-B[0]||A[1]-B[1]||A[2].localeCompare(B[2],'pt-BR');
+}
 function populatePieceSelect(type,labelEmpty){
   const sel=$(type+'Select');
   if(!sel)return;
@@ -308,18 +328,48 @@ function populatePieceSelect(type,labelEmpty){
   const own=collection[type]||[];
   const ref=PIECES[PIECE_ARRAYS[type]]||[];
   const seen=new Set();
-  const combined=[...own,...ref].filter(x=>{
+  const combined=[...own,...ref].map(x=>String(x).trim()).filter(x=>{
     const k=x.toLocaleLowerCase('pt-BR');
-    if(seen.has(k))return false; seen.add(k); return true;
+    if(!x||seen.has(k))return false; seen.add(k); return true;
   });
-  const ownSet=new Set(own.map(x=>x.toLocaleLowerCase('pt-BR')));
+  const ownSet=new Set(own.map(x=>String(x).trim().toLocaleLowerCase('pt-BR')));
+  const display=x=>`${ownSet.has(x.toLocaleLowerCase('pt-BR'))?'★ ':''}${esc(x)}`;
   let opts=`<option value="">${labelEmpty}</option>`;
-  if(own.length){
-    opts+='<optgroup label="Minha coleção">'+own.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')+'</optgroup>';
-  }
-  const others=combined.filter(x=>!ownSet.has(x.toLocaleLowerCase('pt-BR')));
-  if(others.length){
-    opts+='<optgroup label="Catálogo de referência">'+others.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')+'</optgroup>';
+
+  if(type==='blade'||type==='bit'){
+    const groups={};
+    TYPE_ORDER.forEach(c=>groups[c]=[]);
+    combined.forEach(x=>(groups[pieceCategory(type,x)]||groups['Não classificado']).push(x));
+    TYPE_ORDER.forEach(cat=>{
+      const arr=groups[cat].sort((a,b)=>{
+        const ao=ownSet.has(a.toLocaleLowerCase('pt-BR'))?0:1;
+        const bo=ownSet.has(b.toLocaleLowerCase('pt-BR'))?0:1;
+        return ao-bo||a.localeCompare(b,'pt-BR');
+      });
+      if(arr.length) opts+=`<optgroup label="${cat}">${arr.map(x=>`<option value="${esc(x)}">${display(x)}</option>`).join('')}</optgroup>`;
+    });
+  } else if(type==='ratchet'){
+    const arr=combined.sort(compareRatchets);
+    let lastHeight=null,group=[];
+    const flush=()=>{
+      if(!group.length)return;
+      const label=lastHeight===999?'Outras Ratchets':`Altura ${lastHeight}`;
+      opts+=`<optgroup label="${label}">${group.map(x=>`<option value="${esc(x)}">${display(x)}</option>`).join('')}</optgroup>`;
+      group=[];
+    };
+    arr.forEach(x=>{
+      const h=ratchetSortKey(x)[0];
+      if(lastHeight!==null&&h!==lastHeight)flush();
+      lastHeight=h;group.push(x);
+    });
+    flush();
+  } else {
+    const arr=combined.sort((a,b)=>{
+      const ao=ownSet.has(a.toLocaleLowerCase('pt-BR'))?0:1;
+      const bo=ownSet.has(b.toLocaleLowerCase('pt-BR'))?0:1;
+      return ao-bo||a.localeCompare(b,'pt-BR');
+    });
+    if(arr.length) opts+=`<optgroup label="Peças disponíveis">${arr.map(x=>`<option value="${esc(x)}">${display(x)}</option>`).join('')}</optgroup>`;
   }
   opts+='<option value="__manual__">Outra peça…</option>';
   sel.innerHTML=opts;

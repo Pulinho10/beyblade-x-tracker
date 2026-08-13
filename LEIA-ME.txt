@@ -44,3 +44,10 @@ ATUALIZAÇÃO — DROPDOWNS NA NOVA BATALHA
 Os campos Lock Chip, Blade, Assist Blade, Ratchet e Bit agora usam menus dropdown.
 A coleção pessoal aparece em primeiro lugar, seguida do catálogo de referência.
 A opção "Outra peça…" mantém a possibilidade de digitar manualmente um nome.
+
+ATUALIZAÇÃO — DROPDOWNS CATEGORIZADOS
+- Blades e Bits são agrupados por Ataque, Defesa, Resistência e Equilíbrio.
+- Peças manuais sem classificação conhecida aparecem em "Não classificado".
+- O símbolo ★ identifica peças cadastradas em Minha coleção.
+- Ratchets são agrupadas por altura crescente (50, 55, 60, 70, 80, 85...)
+  e ordenadas pelo número de lados dentro de cada altura.
