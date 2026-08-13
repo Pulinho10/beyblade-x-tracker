@@ -35,3 +35,7 @@ peça que ainda não esteja cadastrada.
 
 O Backup JSON agora inclui tanto o histórico de batalhas quanto a coleção pessoal.
 Backups antigos contendo apenas uma lista de batalhas continuam compatíveis.
+
+
+ATUALIZAÇÃO — HISTÓRICO EDITÁVEL
+Cada batalha possui botão Editar. É possível alterar tipo, torneio, jogo, round, peças, adversário, resultado, finalização, pontos e observações diretamente na aba Histórico. Alterar resultado/finalização recalcula os pontos automaticamente.

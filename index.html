@@ -98,6 +98,18 @@ input,select,textarea{font-size:16px!important;min-height:44px}
   .collection-box .toolbar{display:grid;grid-template-columns:1fr auto}
 }
 
+
+.edit-row td{background:#0c1626}
+.edit-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;padding:8px 0}
+.edit-grid .field{grid-column:span 3}
+.edit-grid .field.w6{grid-column:span 6}
+.edit-grid .field.w12{grid-column:span 12}
+.edit-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+@media(max-width:850px){
+  .edit-grid .field,.edit-grid .field.w6,.edit-grid .field.w12{grid-column:span 12}
+  .edit-actions{position:sticky;bottom:76px;background:#0c1626;padding-top:8px}
+}
+
 </style>
 </head><body><div class="app">
 <div class="top"><div class="brand"><h1>⚡ Beyblade X — Battle Tracker</h1><p>Registro de partidas competitivas, treinos, combos e desempenho das peças.</p></div><div class="nav"><button data-tab="new" class="active">Nova batalha</button><button data-tab="history">Histórico</button><button data-tab="stats">Estatísticas</button><button data-tab="pieces">Peças</button></div></div>
@@ -294,8 +306,50 @@ function scopedData(){
 function kpis(ds=data){let w=ds.filter(x=>x.result==='Vitória').length,l=ds.filter(x=>x.result==='Derrota').length,n=ds.length,p=ds.reduce((a,b)=>a+(+b.points||0),0),rate=n?Math.round(w/n*100):0;return [{l:'Batalhas',n},{l:'Vitórias',n:w,c:'winText'},{l:'Derrotas',n:l,c:'lossText'},{l:'Aproveitamento',n:rate+'%'},{l:'Pontos',n:p}]}
 function renderKpis(target,ds=data){$(target).innerHTML=kpis(ds).map(x=>`<div class="kpi"><div class="n ${x.c||''}">${x.n}</div><div class="l">${x.l}</div></div>`).join('')}
 function filtered(){const q=$('search')?.value.toLowerCase().trim()||'',m=$('filterMode')?.value||'',r=$('filterResult')?.value||'',f=$('filterFinish')?.value||'';return data.filter(b=>(!m||normalizeMode(b)===m)&&(!r||b.result===r)&&(!f||b.finish===f)&&(!q||JSON.stringify(b).toLowerCase().includes(q))).slice().reverse()}
-function renderHistory(){const rows=filtered();$('historyBody').innerHTML=rows.length?rows.map(b=>`<tr><td><span class="badge ${normalizeMode(b)==='Treino'?'training':'competitive'}">${normalizeMode(b)}</span></td><td>${esc(b.tournament)}</td><td>${esc(b.game)}</td><td>${b.round||''}</td><td><b>${esc(combo(b))}</b></td><td>${esc(b.opponent)}</td><td><span class="badge ${b.result==='Vitória'?'win':'loss'}">${esc(b.result)}</span></td><td>${esc(b.finish)}</td><td>${b.points??0}</td><td>${esc(b.notes)}</td><td><button class="btn danger" style="padding:6px 8px" onclick="removeBattle('${b.id}')">Excluir</button></td></tr>`).join(''):`<tr><td colspan="11" class="empty">Nenhum registro encontrado.</td></tr>`}
-function removeBattle(id){if(confirm('Excluir esta batalha?')){data=data.filter(x=>x.id!==id);save();renderAll()}}
+
+let editingBattleId=null;
+function historyRowHtml(b){
+  return `<tr><td><span class="badge ${normalizeMode(b)==='Treino'?'training':'competitive'}">${normalizeMode(b)}</span></td><td>${esc(b.tournament)}</td><td>${esc(b.game)}</td><td>${b.round||''}</td><td><b>${esc(combo(b))}</b></td><td>${esc(b.opponent)}</td><td><span class="badge ${b.result==='Vitória'?'win':'loss'}">${esc(b.result)}</span></td><td>${esc(b.finish)}</td><td>${b.points??0}</td><td>${esc(b.notes)}</td><td><div class="toolbar"><button class="btn" style="padding:6px 8px" onclick="startEditBattle('${b.id}')">Editar</button><button class="btn danger" style="padding:6px 8px" onclick="removeBattle('${b.id}')">Excluir</button></div></td></tr>`;
+}
+function editBattleRowHtml(b){
+  const mode=normalizeMode(b);
+  return `<tr class="edit-row"><td colspan="11">
+  <div class="edit-grid">
+    <div class="field"><label>Tipo</label><select id="edit-mode"><option value="Competitiva"${mode==='Competitiva'?' selected':''}>Partida competitiva</option><option value="Treino"${mode==='Treino'?' selected':''}>Batalha de treino</option></select></div>
+    <div class="field"><label>Torneio / Evento</label><input id="edit-tournament" value="${esc(b.tournament)}"></div>
+    <div class="field"><label>Jogo</label><input id="edit-game" value="${esc(b.game)}"></div>
+    <div class="field"><label>Round</label><input id="edit-round" type="number" min="1" value="${b.round||1}"></div>
+    <div class="field"><label>Lock Chip</label><input id="edit-lockChip" list="dl-lock" value="${esc(b.lockChip)}"></div>
+    <div class="field"><label>Blade</label><input id="edit-blade" list="dl-blade" value="${esc(b.blade)}"></div>
+    <div class="field"><label>Assist Blade</label><input id="edit-assistBlade" list="dl-assist" value="${esc(b.assistBlade)}"></div>
+    <div class="field"><label>Ratchet</label><input id="edit-ratchet" list="dl-ratchet" value="${esc(b.ratchet)}"></div>
+    <div class="field"><label>Bit</label><input id="edit-bit" list="dl-bit" value="${esc(b.bit)}"></div>
+    <div class="field w6"><label>Adversário / Combo</label><input id="edit-opponent" value="${esc(b.opponent)}"></div>
+    <div class="field"><label>Resultado</label><select id="edit-result"><option value="Vitória"${b.result==='Vitória'?' selected':''}>Vitória</option><option value="Derrota"${b.result==='Derrota'?' selected':''}>Derrota</option></select></div>
+    <div class="field"><label>Finalização</label><select id="edit-finish">${['Spin Finish','Over Finish','Burst Finish','Extreme Finish','Penalização'].map(x=>`<option${b.finish===x?' selected':''}>${x}</option>`).join('')}</select></div>
+    <div class="field"><label>Pontos</label><input id="edit-points" type="number" min="0" value="${b.points??0}"></div>
+    <div class="field w12"><label>Observações</label><textarea id="edit-notes">${esc(b.notes)}</textarea></div>
+  </div>
+  <div class="edit-actions"><button class="btn ghost" onclick="cancelEditBattle()">Cancelar</button><button class="btn primary" onclick="saveEditedBattle('${b.id}')">Salvar alterações</button></div>
+  </td></tr>`;
+}
+function renderHistory(){
+  const rows=filtered();
+  $('historyBody').innerHTML=rows.length?rows.map(b=>editingBattleId===b.id?editBattleRowHtml(b):historyRowHtml(b)).join(''):`<tr><td colspan="11" class="empty">Nenhum registro encontrado.</td></tr>`;
+}
+function startEditBattle(id){editingBattleId=id;renderHistory();setTimeout(()=>{const r=document.querySelector('.edit-row');if(r)r.scrollIntoView({behavior:'smooth',block:'center'})},0)}
+function cancelEditBattle(){editingBattleId=null;renderHistory()}
+function saveEditedBattle(id){
+  const idx=data.findIndex(x=>x.id===id); if(idx<0)return;
+  const blade=$('edit-blade').value.trim(),ratchet=$('edit-ratchet').value.trim(),bit=$('edit-bit').value.trim();
+  if(!blade){alert('Informe a Blade.');return}
+  if(!ratchet||!bit){alert('Informe Ratchet e Bit.');return}
+  const result=$('edit-result').value,finish=$('edit-finish').value;
+  let points=+$('edit-points').value;if(!Number.isFinite(points))points=pointFor(result,finish);
+  data[idx]={...data[idx],mode:$('edit-mode').value,tournament:$('edit-tournament').value.trim(),game:$('edit-game').value.trim(),round:+$('edit-round').value||1,lockChip:$('edit-lockChip').value.trim(),blade,assistBlade:$('edit-assistBlade').value.trim(),ratchet,bit,opponent:$('edit-opponent').value.trim(),result,finish,points,notes:$('edit-notes').value.trim(),editedAt:new Date().toISOString()};
+  save();editingBattleId=null;renderAll();
+}
+function removeBattle(id){if(confirm('Excluir esta batalha?')){data=data.filter(x=>x.id!==id);if(editingBattleId===id)editingBattleId=null;save();renderAll()}}
 function bars(target,obj,total){const entries=Object.entries(obj).sort((a,b)=>b[1]-a[1]);$(target).innerHTML=entries.length?entries.map(([k,v])=>`<div class="barrow"><span>${esc(k)}</span><div class="bar"><i style="width:${total?Math.round(v/total*100):0}%"></i></div><b>${v}</b></div>`).join(''):'<div class="empty">Sem dados.</div>'}
 function performance(target,key){const m={};scopedData().forEach(b=>{const x=(b[key]||'').trim();if(!x)return;m[x]??={w:0,l:0,n:0};m[x].n++;b.result==='Vitória'?m[x].w++:m[x].l++});const arr=Object.entries(m).sort((a,b)=>((b[1].w/b[1].n)-(a[1].w/a[1].n))||(b[1].n-a[1].n)).slice(0,12);$(target).innerHTML=arr.length?arr.map(([k,v])=>{let pc=Math.round(v.w/v.n*100);return `<div class="barrow"><span title="${esc(k)}">${esc(k)}</span><div class="bar"><i style="width:${pc}%"></i></div><b>${pc}%</b></div>`}).join(''):'<div class="empty">Ainda não há dados registrados para este tipo de peça.</div>'}
 const PIECE_LABELS={blade:'Blade',ratchet:'Ratchet',bit:'Bit',lockChip:'Lock Chip',assistBlade:'Assist Blade'};
@@ -407,6 +461,7 @@ function init(){load();loadCollection();refreshBattleDatalists();renderPieces();
    });
  });
 
+document.addEventListener('change',e=>{if(e.target&&(e.target.id==='edit-result'||e.target.id==='edit-finish')){const r=$('edit-result'),f=$('edit-finish'),p=$('edit-points');if(r&&f&&p)p.value=pointFor(r.value,f.value);}});
 $('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterMode','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('statsScope').onchange=renderStats;$('comboNameFilter').onchange=renderComboDetail;$('comboMinBattles').onchange=renderComboRanking;$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify({battles:data,collection},null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);const battles=Array.isArray(v)?v:v.battles;if(!Array.isArray(battles))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=battles;if(v&&v.collection){COLLECTION_TYPES.forEach(k=>collection[k]=Array.isArray(v.collection[k])?v.collection[k]:[]);saveCollection();renderCollection();refreshBattleDatalists();}save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
 }
 init();
