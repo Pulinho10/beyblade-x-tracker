@@ -39,3 +39,8 @@ Backups antigos contendo apenas uma lista de batalhas continuam compatíveis.
 
 ATUALIZAÇÃO — HISTÓRICO EDITÁVEL
 Cada batalha possui botão Editar. É possível alterar tipo, torneio, jogo, round, peças, adversário, resultado, finalização, pontos e observações diretamente na aba Histórico. Alterar resultado/finalização recalcula os pontos automaticamente.
+
+ATUALIZAÇÃO — DROPDOWNS NA NOVA BATALHA
+Os campos Lock Chip, Blade, Assist Blade, Ratchet e Bit agora usam menus dropdown.
+A coleção pessoal aparece em primeiro lugar, seguida do catálogo de referência.
+A opção "Outra peça…" mantém a possibilidade de digitar manualmente um nome.

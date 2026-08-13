@@ -110,6 +110,9 @@ input,select,textarea{font-size:16px!important;min-height:44px}
   .edit-actions{position:sticky;bottom:76px;background:#0c1626;padding-top:8px}
 }
 
+
+.piece-manual{margin-top:7px}
+
 </style>
 </head><body><div class="app">
 <div class="top"><div class="brand"><h1>⚡ Beyblade X — Battle Tracker</h1><p>Registro de partidas competitivas, treinos, combos e desempenho das peças.</p></div><div class="nav"><button data-tab="new" class="active">Nova batalha</button><button data-tab="history">Histórico</button><button data-tab="stats">Estatísticas</button><button data-tab="pieces">Peças</button></div></div>
@@ -121,7 +124,22 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 <div class="field w4"><label>Torneio / Evento</label><input id="tournament" placeholder="Ex.: Semanal Pimpou - 15/08/2026"></div>
 <div class="field w4"><label>Tipo de registro</label><select id="battleMode"><option value="Competitiva">Partida competitiva</option><option value="Treino">Batalha de treino</option></select><div class="hint">As estatísticas serão separadas por tipo.</div></div>
 <div class="field w2"><label>Jogo</label><input id="game" placeholder="1º JOGO"></div><div class="field w2"><label>Round</label><input id="round" type="number" min="1" value="1"></div><div class="field w4"><label>Adversário / Combo</label><input id="opponent" placeholder="Ex.: Wizard Rod 1-60 H"></div>
-<div class="field"><label>Lock Chip (opcional)</label><input id="lockChip" list="dl-lock" placeholder="Selecione da coleção ou digite"></div><div class="field"><label>Blade</label><input id="blade" list="dl-blade" placeholder="Selecione da coleção ou digite"></div><div class="field"><label>Assist Blade (opcional)</label><input id="assistBlade" list="dl-assist" placeholder="Selecione da coleção ou digite"></div><div class="field"><label>Ratchet</label><input id="ratchet" list="dl-ratchet" placeholder="Selecione da coleção ou digite"></div><div class="field"><label>Bit</label><input id="bit" list="dl-bit" placeholder="Selecione da coleção ou digite"></div>
+<div class="field"><label>Lock Chip (opcional)</label>
+<select id="lockChipSelect"><option value="">— Nenhum —</option></select>
+<input id="lockChipManual" class="hidden" placeholder="Digite o Lock Chip">
+</div><div class="field"><label>Blade</label>
+<select id="bladeSelect"><option value="">Selecione</option></select>
+<input id="bladeManual" class="hidden" placeholder="Digite a Blade">
+</div><div class="field"><label>Assist Blade (opcional)</label>
+<select id="assistBladeSelect"><option value="">— Nenhuma —</option></select>
+<input id="assistBladeManual" class="hidden" placeholder="Digite a Assist Blade">
+</div><div class="field"><label>Ratchet</label>
+<select id="ratchetSelect"><option value="">Selecione</option></select>
+<input id="ratchetManual" class="hidden" placeholder="Digite o Ratchet">
+</div><div class="field"><label>Bit</label>
+<select id="bitSelect"><option value="">Selecione</option></select>
+<input id="bitManual" class="hidden" placeholder="Digite o Bit">
+</div>
 <div class="field w4"><label>Resultado</label><div class="result-choice"><button id="winBtn" class="win active" type="button">✓ Vitória</button><button id="lossBtn" class="loss" type="button">✕ Derrota</button></div></div><div class="field w4"><label>Tipo de finalização</label><select id="finish"><option>Spin Finish</option><option>Over Finish</option><option>Burst Finish</option><option>Extreme Finish</option><option>Penalização</option></select><div id="finishText" class="hint">Vitória por Spin Finish</div></div><div class="field w2"><label>Pontos</label><input id="points" type="number" value="1" readonly></div>
 <div class="field w12"><label>Observações</label><textarea id="notes" placeholder="Lançamento, matchup, erro, ajuste de técnica, etc."></textarea></div></div>
 <div class="toolbar" style="margin-top:14px"><button class="btn primary" id="saveBtn">Salvar batalha</button><button class="btn ghost" id="clearBtn">Limpar campos</button><span id="saveMsg" class="hint"></span></div></div>
@@ -277,13 +295,62 @@ function combinedSuggestions(type){
     seen.add(k); return true;
   });
 }
+
+function selectPieceValue(type){
+  const sel=$(type+'Select');
+  if(!sel)return '';
+  return sel.value==='__manual__' ? ($(type+'Manual')?.value||'').trim() : sel.value.trim();
+}
+function populatePieceSelect(type,labelEmpty){
+  const sel=$(type+'Select');
+  if(!sel)return;
+  const current=selectPieceValue(type);
+  const own=collection[type]||[];
+  const ref=PIECES[PIECE_ARRAYS[type]]||[];
+  const seen=new Set();
+  const combined=[...own,...ref].filter(x=>{
+    const k=x.toLocaleLowerCase('pt-BR');
+    if(seen.has(k))return false; seen.add(k); return true;
+  });
+  const ownSet=new Set(own.map(x=>x.toLocaleLowerCase('pt-BR')));
+  let opts=`<option value="">${labelEmpty}</option>`;
+  if(own.length){
+    opts+='<optgroup label="Minha coleção">'+own.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')+'</optgroup>';
+  }
+  const others=combined.filter(x=>!ownSet.has(x.toLocaleLowerCase('pt-BR')));
+  if(others.length){
+    opts+='<optgroup label="Catálogo de referência">'+others.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')+'</optgroup>';
+  }
+  opts+='<option value="__manual__">Outra peça…</option>';
+  sel.innerHTML=opts;
+  if(current && combined.includes(current)) sel.value=current;
+}
 function refreshBattleDatalists(){
   options('dl-lock',combinedSuggestions('lockChip'));
   options('dl-blade',combinedSuggestions('blade'));
   options('dl-assist',combinedSuggestions('assistBlade'));
   options('dl-ratchet',combinedSuggestions('ratchet'));
   options('dl-bit',combinedSuggestions('bit'));
+  populatePieceSelect('lockChip','— Nenhum —');
+  populatePieceSelect('blade','Selecione');
+  populatePieceSelect('assistBlade','— Nenhuma —');
+  populatePieceSelect('ratchet','Selecione');
+  populatePieceSelect('bit','Selecione');
 }
+function bindPieceDropdowns(){
+  ['lockChip','blade','assistBlade','ratchet','bit'].forEach(type=>{
+    const sel=$(type+'Select'),manual=$(type+'Manual');
+    if(!sel||!manual)return;
+    manual.classList.add('piece-manual');
+    sel.onchange=()=>{
+      const useManual=sel.value==='__manual__';
+      manual.classList.toggle('hidden',!useManual);
+      if(useManual) setTimeout(()=>manual.focus(),0);
+      else manual.value='';
+    };
+  });
+}
+
 const SEED=[];
 const KEY='beybladeXBattleTracker_v1';
 let data=[]; let currentResult='Vitória';
@@ -440,11 +507,22 @@ function renderComboRanking(){
 
 function renderStats(){const ds=scopedData();renderKpis('statsKpis',ds);refreshComboNames();renderComboRanking();let wf={},lf={};ds.forEach(b=>{let o=b.result==='Vitória'?wf:lf;o[b.finish]=(o[b.finish]||0)+1});bars('winFinish',wf,ds.filter(x=>x.result==='Vitória').length);bars('lossFinish',lf,ds.filter(x=>x.result==='Derrota').length);performance('bladeStats','blade');performance('ratchetStats','ratchet');performance('bitStats','bit');renderAuxPerformance();refreshPieceNames();renderPieceRanking()}
 function renderAll(){renderKpis('quickKpis');renderHistory();renderStats();}
-function clearForm(){['lockChip','blade','assistBlade','ratchet','bit','opponent','notes'].forEach(x=>$(x).value='');$('round').value=(+($('round').value||0))+1;currentResult='Vitória';$('finish').value='Spin Finish';updateResultUI();}
-function addBattle(){if(!$('blade').value.trim()){alert('Selecione ou digite a Blade.');return} if(!$('ratchet').value.trim()||!$('bit').value.trim()){alert('Informe Ratchet e Bit.');return} const b={id:'b-'+Date.now(),createdAt:new Date().toISOString(),mode:$('battleMode').value,tournament:$('tournament').value.trim(),game:$('game').value.trim(),round:+$('round').value||1,lockChip:$('lockChip').value.trim(),blade:$('blade').value.trim(),assistBlade:$('assistBlade').value.trim(),ratchet:$('ratchet').value.trim(),bit:$('bit').value.trim(),opponent:$('opponent').value.trim(),result:currentResult,finish:$('finish').value,points:pointFor(currentResult,$('finish').value),notes:$('notes').value.trim(),source:'Aplicativo'};data.push(b);save();$('saveMsg').textContent='Batalha salva ✓';setTimeout(()=>$('saveMsg').textContent='',1800);clearForm();renderAll();}
+function clearForm(){
+['lockChip','blade','assistBlade','ratchet','bit'].forEach(type=>{
+  const s=$(type+'Select'),m=$(type+'Manual');
+  if(s)s.value=''; if(m){m.value='';m.classList.add('hidden');}
+});
+['opponent','notes'].forEach(x=>$(x).value='');
+$('round').value=(+($('round').value||0))+1;currentResult='Vitória';$('finish').value='Spin Finish';updateResultUI();
+}
+function addBattle(){
+const blade=selectPieceValue('blade'),ratchet=selectPieceValue('ratchet'),bit=selectPieceValue('bit');
+if(!blade){alert('Selecione ou informe a Blade.');return}
+if(!ratchet||!bit){alert('Selecione ou informe Ratchet e Bit.');return}
+const b={id:'b-'+Date.now(),createdAt:new Date().toISOString(),mode:$('battleMode').value,tournament:$('tournament').value.trim(),game:$('game').value.trim(),round:+$('round').value||1,lockChip:selectPieceValue('lockChip'),blade,assistBlade:selectPieceValue('assistBlade'),ratchet,bit,opponent:$('opponent').value.trim(),result:currentResult,finish:$('finish').value,points:pointFor(currentResult,$('finish').value),notes:$('notes').value.trim(),source:'Aplicativo'};data.push(b);save();$('saveMsg').textContent='Batalha salva ✓';setTimeout(()=>$('saveMsg').textContent='',1800);clearForm();renderAll();}
 function dl(name,content,type){const blob=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function csv(){const cols=['mode','tournament','game','round','lockChip','blade','assistBlade','ratchet','bit','opponent','result','finish','points','notes'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';return '\ufeff'+[cols.join(';'),...data.map(b=>cols.map(c=>q(b[c])).join(';'))].join('\r\n')}
-function init(){load();loadCollection();refreshBattleDatalists();renderPieces();renderCollection();renderAll();updateResultUI();
+function init(){load();loadCollection();refreshBattleDatalists();bindPieceDropdowns();renderPieces();renderCollection();renderAll();updateResultUI();
  document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');['new','history','stats','pieces'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==btn.dataset.tab));if(btn.dataset.tab==='history')renderHistory();if(btn.dataset.tab==='stats')renderStats()});
  
  document.querySelectorAll('[data-add-piece]').forEach(btn=>btn.onclick=()=>{
