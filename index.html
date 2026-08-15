@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-<title> Diário de Batalhas - Beyblade X</title>
+<title>Beyblade X — Battle Tracker</title>
 <style>
 :root{--bg:#0b1220;--panel:#111b2e;--panel2:#17243b;--line:#263750;--text:#edf3ff;--muted:#9fb0c9;--accent:#27a7ff;--accent2:#6de1ff;--win:#27c281;--loss:#ff647c;--warn:#ffc857;--input:#0d1728}
 *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Inter,Arial,sans-serif;background:linear-gradient(145deg,#07101f,#0d1729 45%,#101a2d);color:var(--text);min-height:100vh}
@@ -113,14 +113,31 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 
 .piece-manual{margin-top:7px}
 
+
+.quick-combo-panel{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#0d1a2b;border:1px solid var(--line);padding:12px;border-radius:12px;margin-bottom:14px}
+.favorite-combos{display:grid;gap:10px;margin-top:14px}
+.favorite-combo-item{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.favorite-combo-item .actions{display:flex;gap:6px}
+.opponent-stats-card{border-color:#4b3b70}
+@media(max-width:850px){.quick-combo-panel{grid-template-columns:1fr}.favorite-combo-item{flex-direction:column;align-items:flex-start}.favorite-combo-item .actions{width:100%}.favorite-combo-item .actions .btn{flex:1}}
+
+.matchup-stats-card{border-color:#2c5f52}
+@media(max-width:850px){
+  .matchup-stats-card .piece-stat-controls{display:grid;grid-template-columns:1fr}
+}
 </style>
 </head><body><div class="app">
-<div class="top"><div class="brand"><h1> Diário de Batalhas - Beyblade X</h1><p>Registro de partidas competitivas, treinos, combos e desempenho das peças.</p></div><div class="nav"><button data-tab="new" class="active">Nova batalha</button><button data-tab="history">Histórico</button><button data-tab="stats">Estatísticas</button><button data-tab="pieces">Peças</button></div></div>
+<div class="top"><div class="brand"><h1>⚡ Beyblade X — Battle Tracker</h1><p>Registro de partidas competitivas, treinos, combos e desempenho das peças.</p></div><div class="nav"><button data-tab="new" class="active">Nova batalha</button><button data-tab="history">Histórico</button><button data-tab="stats">Estatísticas</button><button data-tab="pieces">Peças</button></div></div>
 
 <section id="tab-new">
 <div class="notice mobile-install"><b>Instalação no celular:</b> no iPhone/iPad, abra no Safari e use <b>Compartilhar → Adicionar à Tela de Início</b>. No Android/Chrome, use <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</div>
 <div class="notice"><b>Versão geral:</b> o histórico começa vazio. Registre partidas competitivas e treinos; os dados ficam salvos neste dispositivo até você exportar um backup.</div>
-<div class="card"><h2>Registrar batalha</h2><div class="grid">
+<div class="card"><h2>Registrar batalha</h2>
+<div class="quick-combo-panel">
+<div class="field"><label>Usar combo já utilizado</label><select id="usedComboSelect"><option value="">Selecione um combo anterior</option></select></div>
+<div class="field"><label>Usar combo favorito</label><select id="favoriteComboSelect"><option value="">Selecione um favorito</option></select></div>
+</div>
+<div class="grid">
 <div class="field w4"><label>Torneio / Evento</label><input id="tournament" placeholder="Ex.: Semanal Pimpou - 15/08/2026"></div>
 <div class="field w4"><label>Tipo de registro</label><select id="battleMode"><option value="Competitiva">Partida competitiva</option><option value="Treino">Batalha de treino</option></select><div class="hint">As estatísticas serão separadas por tipo.</div></div>
 <div class="field w2"><label>Jogo</label><input id="game" placeholder="1º JOGO"></div><div class="field w2"><label>Round</label><input id="round" type="number" min="1" value="1"></div><div class="field w4"><label>Adversário / Combo</label><input id="opponent" placeholder="Ex.: Wizard Rod 1-60 H"></div>
@@ -159,6 +176,45 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 <span class="hint">Todas as análises abaixo — peças, combos e finalizações — respeitam este filtro.</span>
 </div></div>
 
+<div class="card matchup-stats-card">
+<h2>Comparativo de confrontos — seu combo × combo adversário</h2>
+<p class="hint">Analisa cada matchup específico entre um combo utilizado por você e o combo adversário registrado.</p>
+<div class="piece-stat-controls">
+  <div class="field"><label>Seu combo</label><select id="matchupUserComboFilter"></select></div>
+  <div class="field"><label>Combo adversário</label><select id="matchupOpponentFilter"></select></div>
+</div>
+<div id="matchupKpis" class="mini-kpis"></div>
+<div class="detail-grid">
+  <div><h3>Suas vitórias neste confronto</h3><div id="matchupWinFinish"></div></div>
+  <div><h3>Suas derrotas neste confronto</h3><div id="matchupLossFinish"></div></div>
+</div>
+</div>
+<div class="card">
+<h2>Ranking de matchups</h2>
+<div class="toolbar">
+<select id="matchupMinBattles">
+<option value="1">Mín. 1 confronto</option>
+<option value="2">Mín. 2 confrontos</option>
+<option value="3">Mín. 3 confrontos</option>
+<option value="5">Mín. 5 confrontos</option>
+</select>
+<span class="hint">Cada linha representa um confronto específico entre o seu combo e um combo adversário.</span>
+</div>
+<div class="tablewrap"><table>
+<thead><tr><th>Seu combo</th><th>Combo adversário</th><th>Batalhas</th><th>Vitórias</th><th>Derrotas</th><th>Aproveitamento</th><th>Pontos</th><th>Spin V/D</th><th>Over V/D</th><th>Burst V/D</th><th>Extreme V/D</th></tr></thead>
+<tbody id="matchupRankingBody"></tbody>
+</table></div>
+</div>
+<div class="card opponent-stats-card">
+<h2>Estatísticas contra combos adversários</h2>
+<p class="hint">Agrupadas pelo texto informado no campo Adversário / Combo.</p>
+<div class="piece-stat-controls"><div class="field"><label>Combo adversário</label><select id="opponentComboFilter"></select></div></div>
+<div id="opponentComboKpis" class="mini-kpis"></div>
+<div class="detail-grid"><div><h3>Vitórias contra este combo</h3><div id="opponentWinFinish"></div></div><div><h3>Derrotas contra este combo</h3><div id="opponentLossFinish"></div></div></div>
+</div>
+<div class="card"><h2>Ranking contra combos adversários</h2>
+<div class="toolbar"><select id="opponentMinBattles"><option value="1">Mín. 1 batalha</option><option value="2">Mín. 2 batalhas</option><option value="3">Mín. 3 batalhas</option><option value="5">Mín. 5 batalhas</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Combo adversário</th><th>Batalhas</th><th>Vitórias</th><th>Derrotas</th><th>Aproveitamento</th><th>Pontos</th><th>Spin V/D</th><th>Over V/D</th><th>Burst V/D</th><th>Extreme V/D</th></tr></thead><tbody id="opponentRankingBody"></tbody></table></div></div>
 <div class="card combo-stats-card">
 <h2>Estatísticas por combo</h2>
 <p class="hint">Cada combo é identificado pela combinação exata das peças registradas na partida. Lock Chip e Assist Blade entram no cálculo quando forem informados; nos rounds históricos, o combo é formado pelas peças disponíveis no registro.</p>
@@ -233,6 +289,16 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 </div>
 </div>
 <div class="card">
+<h2>Combos favoritos</h2>
+<p class="hint">Salve combinações completas para reutilizar rapidamente em Nova Batalha.</p>
+<div class="grid">
+<div class="field w6"><label>Nome do favorito</label><input id="favoriteComboName" placeholder="Ex.: Ataque principal"></div>
+<div class="field w6"><label>Combo atual</label><div id="favoriteComboPreview" class="notice">Nenhum combo selecionado.</div></div>
+</div>
+<div class="toolbar"><button class="btn primary" id="saveFavoriteCombo">Salvar combo atual como favorito</button></div>
+<div id="favoriteCombosList" class="favorite-combos"></div>
+</div>
+<div class="card">
 <h2>Catálogo de referência</h2>
 <p class="hint">Lista geral de peças importada da planilha. Use como referência para conferir nomes; não é necessário possuir todas.</p>
 <div id="pieceCols" class="piececols"></div>
@@ -251,6 +317,11 @@ const BLADE_CATEGORIES={"Scythe Incendio":"Equilíbrio","Talon Ptera":"Resistên
 const BIT_CATEGORIES={"T":"Equilíbrio","B":"Resistência","GF":"Ataque","P":"Equilíbrio","LF":"Ataque","GP":"Equilíbrio","C":"Ataque","GF²":"Ataque","K":"Equilíbrio","UF":"Ataque","L":"Ataque","GF³":"Ataque","DB":"Resistência","FB":"Resistência","H":"Equilíbrio","TR":"Ataque","DB²":"Resistência","A":"Ataque","WB":"Resistência","E":"Equilíbrio","DS":"Defesa","G":"Resistência","HN":"Defesa","N":"Defesa","UN":"Defesa","BS":"Defesa","S":"Defesa","GN":"Defesa","Y":"Resistência","WW":"Defesa","LO":"Resistência","O":"Resistência","LR":"Ataque","TP":"Equilíbrio","Q":"Ataque","GR":"Ataque","I":"Ataque","R":"Ataque","J":"Ataque","V":"Ataque","M":"Equilíbrio"};
 const TYPE_ORDER=['Ataque','Defesa','Resistência','Equilíbrio','Não classificado'];
 let collection={lockChip:[],blade:[],assistBlade:[],ratchet:[],bit:[]};
+const FAVORITES_KEY='beyblade_x_favorite_combos_v1';
+let favoriteCombos=[];
+function loadFavoriteCombos(){try{favoriteCombos=JSON.parse(localStorage.getItem(FAVORITES_KEY)||'[]');if(!Array.isArray(favoriteCombos))favoriteCombos=[]}catch(_){favoriteCombos=[]}}
+function saveFavoriteCombos(){localStorage.setItem(FAVORITES_KEY,JSON.stringify(favoriteCombos))}
+
 function loadCollection(){
   try{
     const raw=localStorage.getItem(COLLECTION_KEY);
@@ -298,6 +369,31 @@ function combinedSuggestions(type){
     seen.add(k); return true;
   });
 }
+
+
+function currentComboObject(){return {lockChip:selectPieceValue('lockChip'),blade:selectPieceValue('blade'),assistBlade:selectPieceValue('assistBlade'),ratchet:selectPieceValue('ratchet'),bit:selectPieceValue('bit')}}
+function comboObjectLabel(c){return [c.lockChip,c.blade,c.assistBlade,c.ratchet,c.bit].filter(Boolean).join(' • ')}
+function setPieceSelectValue(type,value){
+ const sel=$(type+'Select'),man=$(type+'Manual');if(!sel||!man)return;value=String(value||'').trim();
+ if(!value){sel.value='';man.value='';man.classList.add('hidden');return}
+ if([...sel.options].some(o=>o.value===value)){sel.value=value;man.value='';man.classList.add('hidden')}
+ else{sel.value='__manual__';man.value=value;man.classList.remove('hidden')}
+}
+function applyComboObject(c){['lockChip','blade','assistBlade','ratchet','bit'].forEach(t=>setPieceSelectValue(t,c[t]||''));updateFavoritePreview()}
+function usedComboRows(){
+ const m={};data.forEach(b=>{const c={lockChip:b.lockChip||'',blade:b.blade||'',assistBlade:b.assistBlade||'',ratchet:b.ratchet||'',bit:b.bit||''};if(!c.blade||!c.ratchet||!c.bit)return;const k=JSON.stringify(c);m[k]??={combo:c,n:0,label:comboObjectLabel(c)};m[k].n++});
+ return Object.values(m).sort((a,b)=>b.n-a.n||a.label.localeCompare(b.label,'pt-BR'))
+}
+function refreshComboQuickMenus(){
+ const u=$('usedComboSelect'),f=$('favoriteComboSelect');
+ if(u){const rows=usedComboRows();u.innerHTML='<option value="">Selecione um combo anterior</option>'+rows.map((x,i)=>`<option value="${i}">${esc(x.label)} — ${x.n}x</option>`).join('')}
+ if(f){f.innerHTML='<option value="">Selecione um favorito</option>'+favoriteCombos.map((x,i)=>`<option value="${i}">${esc(x.name)} — ${esc(comboObjectLabel(x.combo))}</option>`).join('')}
+}
+function updateFavoritePreview(){const e=$('favoriteComboPreview');if(e)e.textContent=comboObjectLabel(currentComboObject())||'Nenhum combo selecionado.'}
+function renderFavoriteCombos(){const e=$('favoriteCombosList');if(!e)return;e.innerHTML=favoriteCombos.length?favoriteCombos.map((x,i)=>`<div class="favorite-combo-item"><div><b>${esc(x.name)}</b><div class="hint">${esc(comboObjectLabel(x.combo))}</div></div><div class="actions"><button class="btn" onclick="useFavoriteCombo(${i})">Usar</button><button class="btn danger" onclick="removeFavoriteCombo(${i})">Remover</button></div></div>`).join(''):'<div class="empty">Nenhum combo favorito salvo.</div>'}
+function useFavoriteCombo(i){if(!favoriteCombos[i])return;applyComboObject(favoriteCombos[i].combo);document.querySelector('[data-tab="new"]').click()}
+function removeFavoriteCombo(i){if(confirm('Remover este combo favorito?')){favoriteCombos.splice(i,1);saveFavoriteCombos();renderFavoriteCombos();refreshComboQuickMenus()}}
+function saveCurrentFavorite(){const c=currentComboObject();if(!c.blade||!c.ratchet||!c.bit){alert('Selecione Blade, Ratchet e Bit.');return}favoriteCombos.push({id:'fav-'+Date.now(),name:$('favoriteComboName').value.trim()||comboObjectLabel(c),combo:c});saveFavoriteCombos();$('favoriteComboName').value='';renderFavoriteCombos();refreshComboQuickMenus();alert('Combo favorito salvo.')}
 
 function selectPieceValue(type){
   const sel=$(type+'Select');
@@ -489,6 +585,77 @@ function comboKey(b){
 function comboLabelFromKey(key){
   return key.split(' | ').map(x=>x.replace(/^(Lock|Blade|Assist|Ratchet|Bit): /,'')).join(' • ');
 }
+
+
+function matchupRows(){
+  const m={};
+  scopedData().forEach(b=>{
+    const ownKey=comboKey(b);
+    const ownName=comboLabelFromKey(ownKey);
+    const opp=String(b.opponent||'').trim();
+    if(!ownKey||!opp)return;
+    const key=ownKey+'|||'+opp;
+    if(!m[key])m[key]={key,ownKey,ownName,opponent:opp,n:0,w:0,l:0,points:0,finish:{}};
+    const x=m[key];
+    x.n++;x.points+=(+b.points||0);
+    if(b.result==='Vitória')x.w++;else if(b.result==='Derrota')x.l++;
+    const f=b.finish||'Sem tipo';
+    x.finish[f]??={w:0,l:0};
+    if(b.result==='Vitória')x.finish[f].w++;else if(b.result==='Derrota')x.finish[f].l++;
+  });
+  return Object.values(m);
+}
+function refreshMatchupFilters(){
+  const rows=matchupRows();
+  const ownMap=new Map(),oppMap=new Map();
+  rows.forEach(x=>{
+    if(!ownMap.has(x.ownKey))ownMap.set(x.ownKey,{key:x.ownKey,name:x.ownName,n:0});
+    ownMap.get(x.ownKey).n+=x.n;
+    if(!oppMap.has(x.opponent))oppMap.set(x.opponent,{name:x.opponent,n:0});
+    oppMap.get(x.opponent).n+=x.n;
+  });
+  const ownRows=[...ownMap.values()].sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name,'pt-BR'));
+  const oppRows=[...oppMap.values()].sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name,'pt-BR'));
+  const ownPrev=$('matchupUserComboFilter').value,oppPrev=$('matchupOpponentFilter').value;
+  $('matchupUserComboFilter').innerHTML=ownRows.length?ownRows.map(x=>`<option value="${esc(x.key)}">${esc(x.name)} — ${x.n}x</option>`).join(''):'<option value="">Sem combos registrados</option>';
+  $('matchupOpponentFilter').innerHTML=oppRows.length?oppRows.map(x=>`<option value="${esc(x.name)}">${esc(x.name)} — ${x.n}x</option>`).join(''):'<option value="">Sem adversários registrados</option>';
+  if(ownRows.some(x=>x.key===ownPrev))$('matchupUserComboFilter').value=ownPrev;
+  if(oppRows.some(x=>x.name===oppPrev))$('matchupOpponentFilter').value=oppPrev;
+  renderMatchupDetail();
+}
+function renderMatchupDetail(){
+  const own=$('matchupUserComboFilter').value,opp=$('matchupOpponentFilter').value;
+  const x=matchupRows().find(r=>r.ownKey===own&&r.opponent===opp);
+  if(!x){
+    $('matchupKpis').innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum confronto registrado entre estes dois combos.</div>';
+    $('matchupWinFinish').innerHTML='<div class="empty">Sem dados.</div>';
+    $('matchupLossFinish').innerHTML='<div class="empty">Sem dados.</div>';
+    return;
+  }
+  const rate=x.n?Math.round(x.w/x.n*100):0,avg=x.n?(x.points/x.n).toFixed(2):'0.00';
+  const vals=[['Batalhas',x.n,''],['Vitórias',x.w,'winText'],['Derrotas',x.l,'lossText'],['Aproveitamento',rate+'%',''],['Pontos',x.points,''],['Pontos/Batalha',avg,'']];
+  $('matchupKpis').innerHTML=vals.map(([l,n,c])=>`<div class="mini-kpi"><div class="n ${c}">${n}</div><div class="l">${l}</div></div>`).join('');
+  let wf={},lf={};Object.entries(x.finish).forEach(([f,v])=>{if(v.w)wf[f]=v.w;if(v.l)lf[f]=v.l});
+  bars('matchupWinFinish',wf,x.w);bars('matchupLossFinish',lf,x.l);
+}
+function renderMatchupRanking(){
+  const min=+$('matchupMinBattles').value||1;
+  const rows=matchupRows().filter(x=>x.n>=min).sort((a,b)=>((b.w/b.n)-(a.w/a.n))||(b.n-a.n)||a.ownName.localeCompare(b.ownName,'pt-BR'));
+  const cell=(x,f)=>`${x.finish[f]?.w||0} / ${x.finish[f]?.l||0}`;
+  $('matchupRankingBody').innerHTML=rows.length?rows.map(x=>`<tr>
+    <td><b>${esc(x.ownName)}</b></td><td>${esc(x.opponent)}</td><td>${x.n}</td>
+    <td class="winText">${x.w}</td><td class="lossText">${x.l}</td><td><b>${Math.round(x.w/x.n*100)}%</b></td><td>${x.points}</td>
+    <td>${cell(x,'Spin Finish')}</td><td>${cell(x,'Over Finish')}</td><td>${cell(x,'Burst Finish')}</td><td>${cell(x,'Extreme Finish')}</td>
+  </tr>`).join(''):`<tr><td colspan="11" class="empty">Nenhum matchup atende ao filtro mínimo.</td></tr>`;
+}
+
+function opponentRows(){
+ const m={};scopedData().forEach(b=>{const n=String(b.opponent||'').trim();if(!n)return;m[n]??={name:n,n:0,w:0,l:0,points:0,finish:{}};const x=m[n];x.n++;x.points+=(+b.points||0);if(b.result==='Vitória')x.w++;else if(b.result==='Derrota')x.l++;const f=b.finish||'Sem tipo';x.finish[f]??={w:0,l:0};if(b.result==='Vitória')x.finish[f].w++;else x.finish[f].l++});return Object.values(m)
+}
+function refreshOpponentNames(){const r=opponentRows().sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name,'pt-BR'));const p=$('opponentComboFilter').value;$('opponentComboFilter').innerHTML=r.length?r.map(x=>`<option value="${esc(x.name)}">${esc(x.name)} — ${x.n} batalha${x.n===1?'':'s'}</option>`).join(''):'<option value="">Sem adversários registrados</option>';if(r.some(x=>x.name===p))$('opponentComboFilter').value=p;renderOpponentDetail()}
+function renderOpponentDetail(){const x=opponentRows().find(r=>r.name===$('opponentComboFilter').value);if(!x){$('opponentComboKpis').innerHTML='<div class="empty" style="grid-column:1/-1">Sem dados.</div>';$('opponentWinFinish').innerHTML='<div class="empty">Sem dados.</div>';$('opponentLossFinish').innerHTML='<div class="empty">Sem dados.</div>';return}const rate=Math.round(x.w/x.n*100),avg=(x.points/x.n).toFixed(2);$('opponentComboKpis').innerHTML=[['Batalhas',x.n,''],['Vitórias',x.w,'winText'],['Derrotas',x.l,'lossText'],['Aproveitamento',rate+'%',''],['Pontos',x.points,''],['Pontos/Batalha',avg,'']].map(([l,n,c])=>`<div class="mini-kpi"><div class="n ${c}">${n}</div><div class="l">${l}</div></div>`).join('');let wf={},lf={};Object.entries(x.finish).forEach(([f,v])=>{if(v.w)wf[f]=v.w;if(v.l)lf[f]=v.l});bars('opponentWinFinish',wf,x.w);bars('opponentLossFinish',lf,x.l)}
+function renderOpponentRanking(){const min=+$('opponentMinBattles').value||1;const rows=opponentRows().filter(x=>x.n>=min).sort((a,b)=>((b.w/b.n)-(a.w/a.n))||(b.n-a.n));const cell=(x,f)=>`${x.finish[f]?.w||0} / ${x.finish[f]?.l||0}`;$('opponentRankingBody').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td>${x.n}</td><td class="winText">${x.w}</td><td class="lossText">${x.l}</td><td><b>${Math.round(x.w/x.n*100)}%</b></td><td>${x.points}</td><td>${cell(x,'Spin Finish')}</td><td>${cell(x,'Over Finish')}</td><td>${cell(x,'Burst Finish')}</td><td>${cell(x,'Extreme Finish')}</td></tr>`).join(''):'<tr><td colspan="10" class="empty">Nenhum combo adversário atende ao filtro.</td></tr>'}
+
 function comboRows(){
   const m={};
   scopedData().forEach(b=>{
@@ -555,7 +722,7 @@ function renderComboRanking(){
   }).join(''):`<tr><td colspan="11" class="empty">Nenhum combo atende ao filtro de batalhas mínimas.</td></tr>`;
 }
 
-function renderStats(){const ds=scopedData();renderKpis('statsKpis',ds);refreshComboNames();renderComboRanking();let wf={},lf={};ds.forEach(b=>{let o=b.result==='Vitória'?wf:lf;o[b.finish]=(o[b.finish]||0)+1});bars('winFinish',wf,ds.filter(x=>x.result==='Vitória').length);bars('lossFinish',lf,ds.filter(x=>x.result==='Derrota').length);performance('bladeStats','blade');performance('ratchetStats','ratchet');performance('bitStats','bit');renderAuxPerformance();refreshPieceNames();renderPieceRanking()}
+function renderStats(){const ds=scopedData();renderKpis('statsKpis',ds);refreshMatchupFilters();renderMatchupRanking();refreshOpponentNames();renderOpponentRanking();refreshComboNames();renderComboRanking();let wf={},lf={};ds.forEach(b=>{let o=b.result==='Vitória'?wf:lf;o[b.finish]=(o[b.finish]||0)+1});bars('winFinish',wf,ds.filter(x=>x.result==='Vitória').length);bars('lossFinish',lf,ds.filter(x=>x.result==='Derrota').length);performance('bladeStats','blade');performance('ratchetStats','ratchet');performance('bitStats','bit');renderAuxPerformance();refreshPieceNames();renderPieceRanking()}
 function renderAll(){renderKpis('quickKpis');renderHistory();renderStats();}
 function clearForm(){
 ['lockChip','blade','assistBlade','ratchet','bit'].forEach(type=>{
@@ -569,10 +736,10 @@ function addBattle(){
 const blade=selectPieceValue('blade'),ratchet=selectPieceValue('ratchet'),bit=selectPieceValue('bit');
 if(!blade){alert('Selecione ou informe a Blade.');return}
 if(!ratchet||!bit){alert('Selecione ou informe Ratchet e Bit.');return}
-const b={id:'b-'+Date.now(),createdAt:new Date().toISOString(),mode:$('battleMode').value,tournament:$('tournament').value.trim(),game:$('game').value.trim(),round:+$('round').value||1,lockChip:selectPieceValue('lockChip'),blade,assistBlade:selectPieceValue('assistBlade'),ratchet,bit,opponent:$('opponent').value.trim(),result:currentResult,finish:$('finish').value,points:pointFor(currentResult,$('finish').value),notes:$('notes').value.trim(),source:'Aplicativo'};data.push(b);save();$('saveMsg').textContent='Batalha salva ✓';setTimeout(()=>$('saveMsg').textContent='',1800);clearForm();renderAll();}
+const b={id:'b-'+Date.now(),createdAt:new Date().toISOString(),mode:$('battleMode').value,tournament:$('tournament').value.trim(),game:$('game').value.trim(),round:+$('round').value||1,lockChip:selectPieceValue('lockChip'),blade,assistBlade:selectPieceValue('assistBlade'),ratchet,bit,opponent:$('opponent').value.trim(),result:currentResult,finish:$('finish').value,points:pointFor(currentResult,$('finish').value),notes:$('notes').value.trim(),source:'Aplicativo'};data.push(b);save();refreshComboQuickMenus();$('saveMsg').textContent='Batalha salva ✓';setTimeout(()=>$('saveMsg').textContent='',1800);clearForm();renderAll();}
 function dl(name,content,type){const blob=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function csv(){const cols=['mode','tournament','game','round','lockChip','blade','assistBlade','ratchet','bit','opponent','result','finish','points','notes'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';return '\ufeff'+[cols.join(';'),...data.map(b=>cols.map(c=>q(b[c])).join(';'))].join('\r\n')}
-function init(){load();loadCollection();refreshBattleDatalists();bindPieceDropdowns();renderPieces();renderCollection();renderAll();updateResultUI();
+function init(){load();loadCollection();loadFavoriteCombos();refreshBattleDatalists();bindPieceDropdowns();renderPieces();renderCollection();renderFavoriteCombos();refreshComboQuickMenus();renderAll();updateResultUI();updateFavoritePreview();
  document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');['new','history','stats','pieces'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==btn.dataset.tab));if(btn.dataset.tab==='history')renderHistory();if(btn.dataset.tab==='stats')renderStats()});
  
  document.querySelectorAll('[data-add-piece]').forEach(btn=>btn.onclick=()=>{
@@ -590,7 +757,11 @@ function init(){load();loadCollection();refreshBattleDatalists();bindPieceDropdo
  });
 
 document.addEventListener('change',e=>{if(e.target&&(e.target.id==='edit-result'||e.target.id==='edit-finish')){const r=$('edit-result'),f=$('edit-finish'),p=$('edit-points');if(r&&f&&p)p.value=pointFor(r.value,f.value);}});
-$('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterMode','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('statsScope').onchange=renderStats;$('comboNameFilter').onchange=renderComboDetail;$('comboMinBattles').onchange=renderComboRanking;$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify({battles:data,collection},null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);const battles=Array.isArray(v)?v:v.battles;if(!Array.isArray(battles))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=battles;if(v&&v.collection){COLLECTION_TYPES.forEach(k=>collection[k]=Array.isArray(v.collection[k])?v.collection[k]:[]);saveCollection();renderCollection();refreshBattleDatalists();}save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
+$('usedComboSelect').onchange=()=>{const i=+$('usedComboSelect').value,r=usedComboRows();if(Number.isInteger(i)&&r[i])applyComboObject(r[i].combo);$('usedComboSelect').value='';};
+$('favoriteComboSelect').onchange=()=>{const i=+$('favoriteComboSelect').value;if(Number.isInteger(i)&&favoriteCombos[i])applyComboObject(favoriteCombos[i].combo);$('favoriteComboSelect').value='';};
+$('saveFavoriteCombo').onclick=saveCurrentFavorite;
+['lockChipSelect','bladeSelect','assistBladeSelect','ratchetSelect','bitSelect','lockChipManual','bladeManual','assistBladeManual','ratchetManual','bitManual'].forEach(id=>{const e=$(id);if(e)e.addEventListener('input',updateFavoritePreview)});
+$('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterMode','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('statsScope').onchange=renderStats;$('matchupUserComboFilter').onchange=renderMatchupDetail;$('matchupOpponentFilter').onchange=renderMatchupDetail;$('matchupMinBattles').onchange=renderMatchupRanking;$('opponentComboFilter').onchange=renderOpponentDetail;$('opponentMinBattles').onchange=renderOpponentRanking;$('comboNameFilter').onchange=renderComboDetail;$('comboMinBattles').onchange=renderComboRanking;$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify({battles:data,collection,favoriteCombos},null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);const battles=Array.isArray(v)?v:v.battles;if(!Array.isArray(battles))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=battles;if(v&&v.collection){COLLECTION_TYPES.forEach(k=>collection[k]=Array.isArray(v.collection[k])?v.collection[k]:[]);saveCollection();renderCollection();refreshBattleDatalists();}if(v&&Array.isArray(v.favoriteCombos)){favoriteCombos=v.favoriteCombos;saveFavoriteCombos();renderFavoriteCombos();refreshComboQuickMenus();}save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
 }
 init();
 </script>
