@@ -60,3 +60,17 @@ A aba Estatísticas agora permite comparar diretamente:
 São exibidos batalhas, vitórias, derrotas, aproveitamento, pontos, média de pontos
 e distribuição de vitórias/derrotas por tipo de finalização para cada matchup.
 Também há um ranking geral de todos os confrontos.
+
+ATUALIZAÇÃO — IMAGENS ILUSTRATIVAS E PRESETS DE OPONENTE
+- Todas as peças exibidas na aba Peças agora possuem imagens ilustrativas geradas no próprio app.
+- A coleção pessoal também mostra as peças em formato de cards com ilustração.
+- É possível salvar combos oponentes pré-configurados e reutilizá-los em Nova Batalha.
+- O backup JSON agora inclui também os presets de combos oponentes.
+
+ATUALIZAÇÃO — IMAGENS DO BEYBLADE WIKI/FANDOM
+- Os cards de peças tentam carregar online a imagem associada ao artigo da peça no Beyblade Wiki/Fandom.
+- Nomes Hasbro são convertidos para os nomes Takara Tomy correspondentes quando necessário.
+- Bits usam as páginas correspondentes aos nomes completos das abreviações (ex.: GF -> Gear Flat).
+- Ratchets usam sua abreviação como título de consulta.
+- As URLs resolvidas são salvas em cache local para reduzir consultas futuras.
+- Se o Fandom estiver indisponível ou não houver imagem correspondente, o app mantém o fallback ilustrativo.
