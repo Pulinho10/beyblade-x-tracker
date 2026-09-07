@@ -43,12 +43,12 @@ input,select,textarea{font-size:16px!important;min-height:44px}
   .brand p{font-size:13px}
   .nav{
     position:fixed;left:0;right:0;bottom:0;z-index:1000;
-    display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+    display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
     padding:8px 8px calc(8px + env(safe-area-inset-bottom));
     background:rgba(8,16,29,.97);border-top:1px solid var(--line);
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)
   }
-  .nav button{padding:8px 4px;border-radius:10px;font-size:12px;min-width:0}
+  .nav button{padding:8px 3px;border-radius:10px;font-size:11px;min-width:0}
   .card{padding:14px;border-radius:14px;margin-bottom:12px}
   .card h2{font-size:19px}.card h3{font-size:16px}
   .grid{gap:10px}
@@ -149,13 +149,35 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 .piece-card .image-source{font-size:10px;color:var(--muted);margin-top:4px}
 .piece-card .image-source a{color:#8fd4ff;text-decoration:none}
 .piece-card .image-source a:hover{text-decoration:underline}
+
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px}
+.chart-card h3{margin:0 0 10px}
+.chart-bars{display:grid;gap:8px}
+.chart-row{display:grid;grid-template-columns:minmax(110px,1.2fr) 3fr auto;gap:8px;align-items:center}
+.chart-label{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-track{height:12px;background:#101b2a;border-radius:999px;overflow:hidden;border:1px solid #22354e}
+.chart-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#4f8cff,#7dd3fc)}
+.chart-value{font-size:12px;font-weight:700;min-width:38px;text-align:right}
+.chart-empty{color:var(--muted);font-size:13px;padding:10px 0}
+.history-group-row td{background:#101c2c;border-top:2px solid #2d4a69;padding-top:14px;padding-bottom:10px}
+.history-group-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.history-group-title b{font-size:14px}
+.history-group-meta{font-size:12px;color:var(--muted)}
+.history-group-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.tournament-chart-note{font-size:11px;color:var(--muted);margin-top:8px}
+@media(max-width:850px){
+  .chart-grid{grid-template-columns:1fr}
+  .chart-row{grid-template-columns:minmax(90px,1.2fr) 2fr auto}
+}
+
 </style>
 </head><body><div class="app">
-<div class="top"><div class="brand"><h1>⚡ Beyblade X — Battle Tracker</h1><p>Registro de partidas competitivas, treinos, combos e desempenho das peças.</p></div><div class="nav"><button data-tab="new" class="active">Nova batalha</button><button data-tab="history">Histórico</button><button data-tab="stats">Estatísticas</button><button data-tab="pieces">Peças</button></div></div>
+<div class="top"><div class="brand"><h1>⚡ Beyblade X — Battle Tracker</h1><p>Registro de partidas competitivas, treinos, combos e desempenho das peças.</p></div><div class="nav"><button data-tab="new" class="active">Nova batalha</button><button data-tab="history">Histórico</button><button data-tab="stats">Estatísticas</button><button data-tab="tournaments">Torneios</button><button data-tab="pieces">Peças</button></div></div>
 
 <section id="tab-new">
 <div class="notice mobile-install"><b>Instalação no celular:</b> no iPhone/iPad, abra no Safari e use <b>Compartilhar → Adicionar à Tela de Início</b>. No Android/Chrome, use <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</div>
-<div class="notice"><b>Versão geral:</b> o histórico começa vazio. Registre partidas competitivas e treinos; os dados ficam salvos neste dispositivo até você exportar um backup.</div>
+<div class="notice"><b>Catálogo atualizado em 06/09/2026:</b> inclui peças já lançadas pela Takara Tomy e Hasbro, inclusive componentes CX. Produtos com lançamento oficial em 12/09/2026 ou depois não foram marcados como já lançados.</div><div class="notice"><b>Versão geral:</b> o histórico começa vazio. Registre partidas competitivas e treinos; os dados ficam salvos neste dispositivo até você exportar um backup.</div>
 <div class="card"><h2>Registrar batalha</h2>
 <div class="quick-combo-panel">
 <div class="field"><label>Usar combo já utilizado</label><select id="usedComboSelect"><option value="">Selecione um combo anterior</option></select></div>
@@ -172,11 +194,17 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 </div><div class="field"><label>Blade</label>
 <select id="bladeSelect"><option value="">Selecione</option></select><div class="hint">Organizadas por Ataque, Defesa, Resistência e Equilíbrio. ★ = sua coleção.</div>
 <input id="bladeManual" class="hidden" placeholder="Digite a Blade">
+</div><div class="field"><label>Over Blade (opcional, CX Expand)</label>
+<select id="overBladeSelect"><option value="">— Nenhum —</option></select>
+<input id="overBladeManual" class="hidden" placeholder="Digite a Over Blade">
+</div><div class="field"><label>Metal Blade (opcional, CX Expand)</label>
+<select id="metalBladeSelect"><option value="">— Nenhum —</option></select>
+<input id="metalBladeManual" class="hidden" placeholder="Digite a Metal Blade">
 </div><div class="field"><label>Assist Blade (opcional)</label>
 <select id="assistBladeSelect"><option value="">— Nenhuma —</option></select>
 <input id="assistBladeManual" class="hidden" placeholder="Digite a Assist Blade">
 </div><div class="field"><label>Ratchet</label>
-<select id="ratchetSelect"><option value="">Selecione</option></select><div class="hint">Ordenadas por altura e, depois, pelo número de lados. ★ = sua coleção.</div>
+<select id="ratchetSelect"><option value="">Selecione</option></select><div class="hint">Ordenadas por altura e, depois, pelo número de lados. Também é possível selecionar <b>Sem Ratchet</b>. ★ = sua coleção.</div>
 <input id="ratchetManual" class="hidden" placeholder="Digite o Ratchet">
 </div><div class="field"><label>Bit</label>
 <select id="bitSelect"><option value="">Selecione</option></select><div class="hint">Organizados por Ataque, Defesa, Resistência e Equilíbrio. ★ = sua coleção.</div>
@@ -192,6 +220,17 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 
 <section id="tab-stats" class="hidden">
 <div class="kpis" id="statsKpis"></div>
+
+<div class="card">
+<h2>Gráficos das estatísticas de batalha</h2>
+<p class="hint">Os gráficos abaixo respeitam o filtro Geral / Competitivas / Treinos.</p>
+<div class="chart-grid">
+  <div class="chart-card"><h3>Vitórias × derrotas</h3><div id="chartWinLoss" class="chart-bars"></div></div>
+  <div class="chart-card"><h3>Finalizações</h3><div id="chartFinishes" class="chart-bars"></div></div>
+  <div class="chart-card"><h3>Combos mais utilizados</h3><div id="chartCombosUsed" class="chart-bars"></div></div>
+  <div class="chart-card"><h3>Aproveitamento dos combos</h3><div id="chartComboWinrate" class="chart-bars"></div></div>
+</div>
+</div>
 <div class="card"><h2>Escopo das estatísticas</h2><div class="toolbar">
 <select id="statsScope">
 <option value="all">Geral — competitivas + treino</option>
@@ -281,6 +320,57 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 <div class="stat-grid"><div class="card"><h3>Vitórias por finalização — geral</h3><div id="winFinish"></div></div><div class="card"><h3>Derrotas por finalização — geral</h3><div id="lossFinish"></div></div><div class="card"><h3>Desempenho por Blade</h3><div id="bladeStats"></div></div><div class="card"><h3>Desempenho por Ratchet</h3><div id="ratchetStats"></div></div><div class="card"><h3>Desempenho por Bit</h3><div id="bitStats"></div></div><div class="card"><h3>Desempenho por Lock/Assist</h3><div id="auxStats"></div></div></div></section>
 
 
+
+<section id="tab-tournaments" class="hidden">
+<div class="card">
+  <h2>Estatísticas por torneio</h2>
+  <p class="hint">Selecione um evento para analisar o desempenho geral e o resultado de cada combo utilizado. Pontos sofridos são calculados pela pontuação padrão do tipo de finalização nas derrotas.</p>
+  <div class="piece-stat-controls">
+    <div class="field"><label>Torneio / Evento</label><select id="tournamentStatsFilter"></select></div>
+    <div class="field"><label>Tipo de registro</label>
+      <select id="tournamentModeFilter">
+        <option value="all">Todos</option>
+        <option value="Competitiva">Competitivas</option>
+        <option value="Treino">Treinos</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="kpis" id="tournamentKpis"></div>
+
+
+<div class="card">
+  <h2>Gráficos do torneio</h2>
+  <div class="chart-grid">
+    <div class="chart-card"><h3>Pontos feitos × sofridos por combo</h3><div id="chartTournamentPoints" class="chart-bars"></div><div class="tournament-chart-note">Cada combo aparece duas vezes: PF = pontos feitos; PS = pontos sofridos.</div></div>
+    <div class="chart-card"><h3>Aproveitamento por combo</h3><div id="chartTournamentWinrate" class="chart-bars"></div></div>
+  </div>
+</div>
+<div class="card">
+  <h2>Desempenho dos combos no evento</h2>
+  <div class="tablewrap"><table>
+    <thead><tr>
+      <th>Combo</th><th>Batalhas</th><th>Vitórias</th><th>Derrotas</th><th>Aproveitamento</th>
+      <th>Pontos feitos</th><th>Pontos sofridos</th><th>Saldo</th>
+      <th>Spin V/D</th><th>Over V/D</th><th>Burst V/D</th><th>Extreme V/D</th>
+    </tr></thead>
+    <tbody id="tournamentComboBody"></tbody>
+  </table></div>
+</div>
+
+<div class="card">
+  <h2>Resumo por adversário no torneio</h2>
+  <div class="tablewrap"><table>
+    <thead><tr>
+      <th>Combo adversário</th><th>Batalhas</th><th>Vitórias</th><th>Derrotas</th>
+      <th>Aproveitamento</th><th>Pontos feitos</th><th>Pontos sofridos</th><th>Saldo</th>
+    </tr></thead>
+    <tbody id="tournamentOpponentBody"></tbody>
+  </table></div>
+</div>
+</section>
+
 <section id="tab-pieces" class="hidden">
 <div class="card">
 <h2>Minha coleção</h2><div class="notice">As imagens são carregadas online a partir dos artigos de peças do <b>Beyblade Wiki/Fandom</b>, com fallback ilustrativo quando não houver correspondência disponível.</div>
@@ -295,6 +385,16 @@ input,select,textarea{font-size:16px!important;min-height:44px}
     <h3>Blades</h3>
     <div class="toolbar"><input id="add-blade" placeholder="Nome da Blade"><button class="btn primary" data-add-piece="blade">Adicionar</button></div>
     <div id="collection-blade" class="chips collection-list"></div>
+  </div>
+  <div class="collection-box">
+    <h3>Over Blades</h3>
+    <div class="toolbar"><input id="add-overBlade" placeholder="Nome da Over Blade"><button class="btn primary" data-add-piece="overBlade">Adicionar</button></div>
+    <div id="collection-overBlade" class="chips collection-list"></div>
+  </div>
+  <div class="collection-box">
+    <h3>Metal Blades</h3>
+    <div class="toolbar"><input id="add-metalBlade" placeholder="Nome da Metal Blade"><button class="btn primary" data-add-piece="metalBlade">Adicionar</button></div>
+    <div id="collection-metalBlade" class="chips collection-list"></div>
   </div>
   <div class="collection-box">
     <h3>Assist Blades</h3>
@@ -340,18 +440,18 @@ input,select,textarea{font-size:16px!important;min-height:44px}
 </div>
 </section>
 
-<datalist id="dl-lock"></datalist><datalist id="dl-blade"></datalist><datalist id="dl-assist"></datalist><datalist id="dl-ratchet"></datalist><datalist id="dl-bit"></datalist>
+<datalist id="dl-lock"></datalist><datalist id="dl-blade"></datalist><datalist id="dl-over"></datalist><datalist id="dl-metal"></datalist><datalist id="dl-assist"></datalist><datalist id="dl-ratchet"></datalist><datalist id="dl-bit"></datalist>
 <div class="footer">Battle Tracker local • coleção e batalhas armazenadas neste dispositivo • faça backups periódicos em JSON/CSV</div></div>
 <script>
-const PIECES={"lockChips": ["Incêndio", "Hell's", "Wolf", "Pegasus", "Cerberus", "Bahamut", "Fox", "Ragna", "Unicorn", "Perseus", "Wizard", "Emperor"], "blades": ["Scythe Incendio", "Talon Ptera", "Roar Tyranno", "Claw Leon", "Keel Shark", "Sting Unicorn", "Cobalt Dragoon", "Soar Phoenix", "Reaper", "Shark Scale", "Tyranno Roar", "Brave", "Hunt", "Silver Wolf", "Hell's Hammer", "Blast", "Wizard Rod", "Dran Buster", "Flame", "Whale Wave", "Mummy Curse", "Clock Mirage", "Hover Wyvern", "Meteor Dragoon", "Valor Bison", "Impact Drake", "Golem Rock", "Samurai Saber", "Leon Crest", "Shinobi Shadow", "Bullet Griffon", "Flare", "Brush", "Dark", "Arc", "Might", "Dran Sword", "Gill Shark", "Mammoth Tusk", "Heaven's Ring", "Weiss Tiger", "Dran Dagger", "Samurai Calibur", "Viper Tail", "Shinobi Knife", "Hell's Chain", "Obsidian Shell", "Tricera Press", "Cowl Sphinx", "Wyvern Gale", "Crimson Garuda", "Tyranno Beat", "Aero Pegasus", "Peak Delta", "Break Blitz", "Flow Rage", "Helm Knight"], "assistBlades": ["Turn", "Jaggy", "Free", "Assault", "Wheel", "Odd", "Arc", "Zillion", "Heavy", "Round", "Erase", "Knuckle"], "ratchets": ["4-60", "3-80", "9-60", "5-60", "3-60", "5-60²", "2-60", "9-60²", "4-70", "4-50", "1-70", "3-60²", "0-60", "3-80²", "3-70", "5-70", "1-60", "5-80", "5-80²", "1-80", "0-80", "M-85", "3-85", "9-80", "2-80", "6-70", "7-55", "4-55", "6-60", "1-50", "7-60"], "bits": ["T", "B", "GF", "P", "LF", "GP", "C", "GF²", "K", "UF", "L", "GF³", "DB", "FB", "H", "TR", "DB²", "A", "WB", "E", "DS", "G", "HN", "N", "UN", "BS", "S", "GN", "Y", "WW", "LO", "O", "LR", "TP", "Q", "GR", "I", "R", "J", "V", "M"]};
+const PIECES={"lockChips":["Bahamut","Brachio","Cerberus","Drake","Dran","Emperor","EVA","Fox","Hells","Hell's","Incêndio","Hornet","Knight","Kraken","Leon","Pegasus","Perseus","Phoenix","Ragna","Rhino","Sol","Stag","Unicorn","Valkyrie","Whale","Wizard","Wolf"],"blades":["Aero Pegasus","Bahamut Blitz","Bear Scratch","Savage Bear","Cobalt Dragoon","Cobalt Drake","Croco Crunch","Bite Croc","Dragoon Storm","Dran Brave","Courage Dran","Dran Buster","Buster Dran","Dran Dagger","Dagger Dran","Dran Sword","Sword Dran","Fox Brush","Brush Fox","Glory Valkyrie","Glory Valkerion","Impact Drake","Leon Fang","Fang Leon","Lightning L-Drago","Meteor Dragoon","Meteoroid Dragoon","Pegasus Blast","Blast Pegasus","Phoenix Feather","Feather Phoenix","Phoenix Wing","Soar Phoenix","Samurai Saber","Saber Samurai","Shark Edge","Keel Shark","Shark Scale","Scale Shark","Shinobi Knife","Knife Shinobi","Storm Pegasis","Strike Dran","Tyranno Beat","Beat Tyranno","Tyranno Roar","Roar Tyranno","Valkyrie Volt","Victory Valkyrie","Xeno Xcalibur","Black Shell","Obsidian Shell","Draciel Shield","Golem Rock","Rock Golem","Heavens Ring","Heaven's Ring","Knight Fortress","Knight Lance","Lance Knight","Knight Mail","Mail Knight","Knight Shield","Helm Knight","Leon Crest","Crest Leon","Mummy Curse","Perseus Dark","Dark Perseus","Phoenix Flare","Rhino Horn","Horn Rhino","Rock Leone","Shinobi Shadow","Shadow Shinobi","Sphinx Cowl","Cowl Sphinx","Tricera Press","Ridge Triceratops","Wyvern Hover","Hover Wyvern","Brachio Whip","Cerberus Flame","Flame Cerberus","Clock Mirage","Ghost Circle","Circle Ghost","Phoenix Rudder","Rudder Phoenix","Ptera Swing","Talon Ptera","Ragna Rage","Rage Ragna","Shark Gill","Gill Shark","Silver Wolf","Sterling Wolf","Viper Tail","Tail Viper","Wizard Arc","Arc Wizard","Wizard Arrow","Arrow Wizard","Wizard Rod","Wand Wizard","Wolf Hunt","Wyvern Gale","Gale Wyvern","Crimson Garuda","Scarlet Garuda","Dranzer Spiral","Driger Slash","Emperor Might","Might Emperor","Goat Tackle","Tackle Goat","Hells Chain","Hell's Chain","Chain Incendio","Hells Hammer","Hell's Hammer","Hammer Incendio","Hells Reaper","Reaper Incendio","Hells Scythe","Scythe Incendio","Leon Claw","Claw Leon","Mammoth Tusk","Tusk Mammoth","Rocket Griffon","Bullet Griffon","Samurai Calibur","Calibur Samurai","Scorpio Spear","Spear Scorpio","Shelter Drake","Sol Eclipse","Spriggan S","Storm Spriggan","Steel Samurai","Unicorn Delta","Unicorn Sting","Sting Unicorn","Weiss Tiger","Pearl Tiger","Whale Wave","Tide Whale","Spider-Man","Venom","Iron Man","Thanos","Darth Vader","Luke Skywalker","The Mandalorian","Moff Gideon","Optimus Prime","Megatron","Optimus Primal","Starscream","Obi-Wan Kenobi","General Grievous","Chewbacca","Stormtrooper","Captain America","Red Hulk","Miles Morales","Green Goblin","T-Rex","Mosasaurus","Spinosaurus","Quetzalcoatlus","Orochi Cluster","Antler","Arc","Blast","Brave","Brush","Dark","Eclipse","Fang","Flame","Flare","Fort","Hunt","Might","Reaper","Volt","Wriggle","Valor Bison","Peak Delta","Break Blitz","Flow Rage"],"overBlades":["Break","Flow","Guard","Outer","Peak"],"metalBlades":["Blitz","Delta","Fortress","Rage","Whip"],"assistBlades":["Assault","Bumper","Charge","Dual","Erase","Free","Gravity","Heavy","Jaggy","Knuckle","Massive","Odd","Round","Slash","Turn","Vertical","Wheel","Zillion"],"ratchets":["0-60","0-70","0-80","1-50","1-60","1-70","1-80","2-60","2-70","2-80","3-60","3-70","3-80","3-85","4-50","4-55","4-60","4-70","4-80","5-60","5-70","5-80","M-85","6-60","6-70","6-80","7-55","7-60","7-70","7-80","8-70","8-80","9-60","9-65","9-70","9-80"],"bits":["A","B","BS","C","DB","DS","D","E","F","FB","FF","GB","GF","GN","GP","GR","GU","G","H","HN","HT","I","J","K","L","LF","LO","LR","M","MN","Nr","N","Op","O","P","Q","RA","R","S","T","TK","TP","Tr","UF","UN","U","V","WB","WW","W","Y","Z"]};
 
 const COLLECTION_KEY='beyblade_x_collection_v1';
-const COLLECTION_TYPES=['lockChip','blade','assistBlade','ratchet','bit'];
-const PIECE_ARRAYS={lockChip:'lockChips',blade:'blades',assistBlade:'assistBlades',ratchet:'ratchets',bit:'bits'};
+const COLLECTION_TYPES=['lockChip','blade','overBlade','metalBlade','assistBlade','ratchet','bit'];
+const PIECE_ARRAYS={lockChip:'lockChips',blade:'blades',overBlade:'overBlades',metalBlade:'metalBlades',assistBlade:'assistBlades',ratchet:'ratchets',bit:'bits'};
 const BLADE_CATEGORIES={"Scythe Incendio":"Equilíbrio","Talon Ptera":"Resistência","Roar Tyranno":"Ataque","Claw Leon":"Equilíbrio","Keel Shark":"Ataque","Sting Unicorn":"Equilíbrio","Cobalt Dragoon":"Ataque","Soar Phoenix":"Ataque","Reaper":"Equilíbrio","Shark Scale":"Ataque","Tyranno Roar":"Ataque","Brave":"Ataque","Hunt":"Resistência","Silver Wolf":"Resistência","Hell's Hammer":"Equilíbrio","Blast":"Ataque","Wizard Rod":"Resistência","Dran Buster":"Ataque","Flame":"Resistência","Whale Wave":"Equilíbrio","Mummy Curse":"Defesa","Clock Mirage":"Resistência","Hover Wyvern":"Defesa","Meteor Dragoon":"Ataque","Valor Bison":"Resistência","Impact Drake":"Ataque","Golem Rock":"Defesa","Samurai Saber":"Ataque","Leon Crest":"Defesa","Shinobi Shadow":"Defesa","Bullet Griffon":"Equilíbrio","Flare":"Defesa","Brush":"Ataque","Dark":"Defesa","Arc":"Resistência","Might":"Equilíbrio","Dran Sword":"Ataque","Gill Shark":"Resistência","Mammoth Tusk":"Equilíbrio","Heaven's Ring":"Defesa","Weiss Tiger":"Equilíbrio","Dran Dagger":"Ataque","Samurai Calibur":"Equilíbrio","Viper Tail":"Resistência","Shinobi Knife":"Defesa","Hell's Chain":"Equilíbrio","Obsidian Shell":"Defesa","Tricera Press":"Defesa","Cowl Sphinx":"Defesa","Wyvern Gale":"Resistência","Crimson Garuda":"Equilíbrio","Tyranno Beat":"Ataque","Aero Pegasus":"Ataque","Peak Delta":"Equilíbrio","Break Blitz":"Ataque","Flow Rage":"Resistência","Helm Knight":"Defesa"};
 const BIT_CATEGORIES={"T":"Equilíbrio","B":"Resistência","GF":"Ataque","P":"Equilíbrio","LF":"Ataque","GP":"Equilíbrio","C":"Ataque","GF²":"Ataque","K":"Equilíbrio","UF":"Ataque","L":"Ataque","GF³":"Ataque","DB":"Resistência","FB":"Resistência","H":"Equilíbrio","TR":"Ataque","DB²":"Resistência","A":"Ataque","WB":"Resistência","E":"Equilíbrio","DS":"Defesa","G":"Resistência","HN":"Defesa","N":"Defesa","UN":"Defesa","BS":"Defesa","S":"Defesa","GN":"Defesa","Y":"Resistência","WW":"Defesa","LO":"Resistência","O":"Resistência","LR":"Ataque","TP":"Equilíbrio","Q":"Ataque","GR":"Ataque","I":"Ataque","R":"Ataque","J":"Ataque","V":"Ataque","M":"Equilíbrio"};
 const TYPE_ORDER=['Ataque','Defesa','Resistência','Equilíbrio','Não classificado'];
-let collection={lockChip:[],blade:[],assistBlade:[],ratchet:[],bit:[]};
+let collection={lockChip:[],blade:[],overBlade:[],metalBlade:[],assistBlade:[],ratchet:[],bit:[]};
 const FAVORITES_KEY='beyblade_x_favorite_combos_v1';
 let favoriteCombos=[];
 const OPPONENT_PRESETS_KEY='beyblade_x_opponent_presets_v1';
@@ -412,17 +512,23 @@ function combinedSuggestions(type){
 }
 
 
-function currentComboObject(){return {lockChip:selectPieceValue('lockChip'),blade:selectPieceValue('blade'),assistBlade:selectPieceValue('assistBlade'),ratchet:selectPieceValue('ratchet'),bit:selectPieceValue('bit')}}
-function comboObjectLabel(c){return [c.lockChip,c.blade,c.assistBlade,c.ratchet,c.bit].filter(Boolean).join(' • ')}
+function currentComboObject(){return {lockChip:selectPieceValue('lockChip'),blade:selectPieceValue('blade'),overBlade:selectPieceValue('overBlade'),metalBlade:selectPieceValue('metalBlade'),assistBlade:selectPieceValue('assistBlade'),ratchet:selectPieceValue('ratchet'),bit:selectPieceValue('bit')}}
+function comboObjectLabel(c){
+  const parts=[c.lockChip,c.blade,c.overBlade,c.metalBlade,c.assistBlade].filter(Boolean);
+  if(c.blade && !c.ratchet) parts.push('Sem Ratchet');
+  if(c.ratchet) parts.push(c.ratchet);
+  if(c.bit) parts.push(c.bit);
+  return parts.join(' • ');
+}
 function setPieceSelectValue(type,value){
  const sel=$(type+'Select'),man=$(type+'Manual');if(!sel||!man)return;value=String(value||'').trim();
- if(!value){sel.value='';man.value='';man.classList.add('hidden');return}
+ if(!value){sel.value=(type==='ratchet'&&[...sel.options].some(o=>o.value==='__none__'))?'__none__':'';man.value='';man.classList.add('hidden');return}
  if([...sel.options].some(o=>o.value===value)){sel.value=value;man.value='';man.classList.add('hidden')}
  else{sel.value='__manual__';man.value=value;man.classList.remove('hidden')}
 }
-function applyComboObject(c){['lockChip','blade','assistBlade','ratchet','bit'].forEach(t=>setPieceSelectValue(t,c[t]||''));updateFavoritePreview()}
+function applyComboObject(c){['lockChip','blade','overBlade','metalBlade','assistBlade','ratchet','bit'].forEach(t=>setPieceSelectValue(t,c[t]||''));updateFavoritePreview()}
 function usedComboRows(){
- const m={};data.forEach(b=>{const c={lockChip:b.lockChip||'',blade:b.blade||'',assistBlade:b.assistBlade||'',ratchet:b.ratchet||'',bit:b.bit||''};if(!c.blade||!c.ratchet||!c.bit)return;const k=JSON.stringify(c);m[k]??={combo:c,n:0,label:comboObjectLabel(c)};m[k].n++});
+ const m={};data.forEach(b=>{const c={lockChip:b.lockChip||'',blade:b.blade||'',overBlade:b.overBlade||'',metalBlade:b.metalBlade||'',assistBlade:b.assistBlade||'',ratchet:b.ratchet||'',bit:b.bit||''};if(!c.blade||!c.bit)return;const k=JSON.stringify(c);m[k]??={combo:c,n:0,label:comboObjectLabel(c)};m[k].n++});
  return Object.values(m).sort((a,b)=>b.n-a.n||a.label.localeCompare(b.label,'pt-BR'))
 }
 function refreshComboQuickMenus(){
@@ -434,11 +540,12 @@ function updateFavoritePreview(){const e=$('favoriteComboPreview');if(e)e.textCo
 function renderFavoriteCombos(){const e=$('favoriteCombosList');if(!e)return;e.innerHTML=favoriteCombos.length?favoriteCombos.map((x,i)=>`<div class="favorite-combo-item"><div><b>${esc(x.name)}</b><div class="hint">${esc(comboObjectLabel(x.combo))}</div></div><div class="actions"><button class="btn" onclick="useFavoriteCombo(${i})">Usar</button><button class="btn danger" onclick="removeFavoriteCombo(${i})">Remover</button></div></div>`).join(''):'<div class="empty">Nenhum combo favorito salvo.</div>'}
 function useFavoriteCombo(i){if(!favoriteCombos[i])return;applyComboObject(favoriteCombos[i].combo);document.querySelector('[data-tab="new"]').click()}
 function removeFavoriteCombo(i){if(confirm('Remover este combo favorito?')){favoriteCombos.splice(i,1);saveFavoriteCombos();renderFavoriteCombos();refreshComboQuickMenus()}}
-function saveCurrentFavorite(){const c=currentComboObject();if(!c.blade||!c.ratchet||!c.bit){alert('Selecione Blade, Ratchet e Bit.');return}favoriteCombos.push({id:'fav-'+Date.now(),name:$('favoriteComboName').value.trim()||comboObjectLabel(c),combo:c});saveFavoriteCombos();$('favoriteComboName').value='';renderFavoriteCombos();refreshComboQuickMenus();alert('Combo favorito salvo.')}
+function saveCurrentFavorite(){const c=currentComboObject();if(!c.blade||!c.bit){alert('Selecione Blade e Bit. O Ratchet pode ser deixado como Sem Ratchet.');return}favoriteCombos.push({id:'fav-'+Date.now(),name:$('favoriteComboName').value.trim()||comboObjectLabel(c),combo:c});saveFavoriteCombos();$('favoriteComboName').value='';renderFavoriteCombos();refreshComboQuickMenus();alert('Combo favorito salvo.')}
 
 function selectPieceValue(type){
   const sel=$(type+'Select');
   if(!sel)return '';
+  if(sel.value==='__none__') return '';
   return sel.value==='__manual__' ? ($(type+'Manual')?.value||'').trim() : sel.value.trim();
 }
 function pieceCategory(type,name){
@@ -515,17 +622,21 @@ function populatePieceSelect(type,labelEmpty){
 function refreshBattleDatalists(){
   options('dl-lock',combinedSuggestions('lockChip'));
   options('dl-blade',combinedSuggestions('blade'));
+  options('dl-over',combinedSuggestions('overBlade'));
+  options('dl-metal',combinedSuggestions('metalBlade'));
   options('dl-assist',combinedSuggestions('assistBlade'));
-  options('dl-ratchet',combinedSuggestions('ratchet'));
+  options('dl-ratchet',['Sem Ratchet',...combinedSuggestions('ratchet')]);
   options('dl-bit',combinedSuggestions('bit'));
   populatePieceSelect('lockChip','— Nenhum —');
   populatePieceSelect('blade','Selecione');
+  populatePieceSelect('overBlade','— Nenhum —');
+  populatePieceSelect('metalBlade','— Nenhum —');
   populatePieceSelect('assistBlade','— Nenhuma —');
-  populatePieceSelect('ratchet','Selecione');
+  populatePieceSelect('ratchet','Selecione'); if($('ratchetSelect') && ![...$('ratchetSelect').options].some(o=>o.value==='__none__')) $('ratchetSelect').insertAdjacentHTML('afterbegin','<option value="__none__">Sem Ratchet</option>');
   populatePieceSelect('bit','Selecione');
 }
 function bindPieceDropdowns(){
-  ['lockChip','blade','assistBlade','ratchet','bit'].forEach(type=>{
+  ['lockChip','blade','overBlade','metalBlade','assistBlade','ratchet','bit'].forEach(type=>{
     const sel=$(type+'Select'),manual=$(type+'Manual');
     if(!sel||!manual)return;
     manual.classList.add('piece-manual');
@@ -545,7 +656,13 @@ const $=id=>document.getElementById(id);
 function load(){try{const s=localStorage.getItem(KEY); data=s?JSON.parse(s):SEED.slice(); if(!s) save();}catch(e){data=SEED.slice();}}
 function save(){localStorage.setItem(KEY,JSON.stringify(data));}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
-function combo(b){return [b.lockChip,b.blade,b.assistBlade,b.ratchet,b.bit].filter(Boolean).join(' ')}
+function combo(b){
+  const parts=[b.lockChip,b.blade,b.overBlade,b.metalBlade,b.assistBlade].filter(Boolean);
+  if(b.blade && !b.ratchet) parts.push('Sem Ratchet');
+  if(b.ratchet) parts.push(b.ratchet);
+  if(b.bit) parts.push(b.bit);
+  return parts.join(' ');
+}
 function pointFor(result,finish){if(result==='Derrota') return 0; return ({'Spin Finish':1,'Over Finish':2,'Burst Finish':2,'Extreme Finish':3,'Penalização':1})[finish]??0;}
 function updateResultUI(){ $('winBtn').classList.toggle('active',currentResult==='Vitória'); $('lossBtn').classList.toggle('active',currentResult==='Derrota'); $('points').value=pointFor(currentResult,$('finish').value); $('finishText').textContent=currentResult+' por '+$('finish').value; }
 function options(id,arr){$(id).innerHTML=arr.map(x=>`<option value="${esc(x)}"></option>`).join('')}
@@ -629,12 +746,14 @@ async function hydratePieceImages(root=document){
   }));
 }
 
-function friendlyTypeName(type){return ({lockChip:'Lock Chip',blade:'Blade',assistBlade:'Assist Blade',ratchet:'Ratchet',bit:'Bit'})[type]||type}
+function friendlyTypeName(type){return ({lockChip:'Lock Chip',blade:'Blade',overBlade:'Over Blade',metalBlade:'Metal Blade',assistBlade:'Assist Blade',ratchet:'Ratchet',bit:'Bit'})[type]||type}
 function pieceCategoryLabel(type,name){
   if(type==='blade') return BLADE_CATEGORIES[name]||'Não classificado';
   if(type==='bit') return BIT_CATEGORIES[name]||'Não classificado';
   if(type==='ratchet'){const k=ratchetSortKey(name);return k[0]===999?'Sem classificação':`Altura ${k[0]}`;}
   if(type==='lockChip') return 'Lock Chip';
+  if(type==='overBlade') return 'Over Blade';
+  if(type==='metalBlade') return 'Metal Blade';
   if(type==='assistBlade') return 'Assist Blade';
   return '';
 }
@@ -646,6 +765,8 @@ function pieceTone(type,name){
   if(cat==='Equilíbrio') return ['#6b4e16','#f59e0b','#78350f'];
   if(type==='ratchet') return ['#3730a3','#818cf8','#1e1b4b'];
   if(type==='lockChip') return ['#4c1d95','#c084fc','#2e1065'];
+  if(type==='overBlade') return ['#7c2d12','#fb923c','#431407'];
+  if(type==='metalBlade') return ['#334155','#e2e8f0','#0f172a'];
   if(type==='assistBlade') return ['#134e4a','#2dd4bf','#042f2e'];
   return ['#334155','#cbd5e1','#0f172a'];
 }
@@ -698,7 +819,7 @@ function renderCollection(){
   });
 }
 function renderPieces(){
-  const groups=[['lockChip','Lock Chips',PIECES.lockChips],['blade','Blades',PIECES.blades],['assistBlade','Assist Blades',PIECES.assistBlades],['ratchet','Ratchets',PIECES.ratchets],['bit','Bits',PIECES.bits]];
+  const groups=[['lockChip','Lock Chips',PIECES.lockChips],['blade','Blades',PIECES.blades],['overBlade','Over Blades',PIECES.overBlades],['metalBlade','Metal Blades',PIECES.metalBlades],['assistBlade','Assist Blades',PIECES.assistBlades],['ratchet','Ratchets',PIECES.ratchets],['bit','Bits',PIECES.bits]];
   $('pieceCols').innerHTML=groups.map(([type,title,arr])=>{
     const items=sortedReferenceList(type,arr);
     return `<div class="piece-section"><div class="piece-header"><h3>${title}</h3><span class="piece-count">${items.length} peças</span></div><div class="piece-grid">${items.map(x=>pieceCard(type,x,'reference')).join('')}</div></div>`;
@@ -743,6 +864,21 @@ function renderKpis(target,ds=data){$(target).innerHTML=kpis(ds).map(x=>`<div cl
 function filtered(){const q=$('search')?.value.toLowerCase().trim()||'',m=$('filterMode')?.value||'',r=$('filterResult')?.value||'',f=$('filterFinish')?.value||'';return data.filter(b=>(!m||normalizeMode(b)===m)&&(!r||b.result===r)&&(!f||b.finish===f)&&(!q||JSON.stringify(b).toLowerCase().includes(q))).slice().reverse()}
 
 let editingBattleId=null;
+
+function tournamentGroupName(b){
+  const n=String(b.tournament||'').trim();
+  return n||'Sem torneio informado';
+}
+function tournamentGroupStats(rows){
+  const n=rows.length,w=rows.filter(x=>x.result==='Vitória').length,l=rows.filter(x=>x.result==='Derrota').length;
+  const pf=rows.reduce((s,b)=>s+pointsScoredByBattle(b),0),ps=rows.reduce((s,b)=>s+pointsConcededByBattle(b),0);
+  return {n,w,l,pf,ps,rate:n?Math.round(w/n*100):0};
+}
+function historyGroupHeader(name,rows){
+  const s=tournamentGroupStats(rows);
+  return `<tr class="history-group-row"><td colspan="11"><div class="history-group-title"><b>${esc(name)}</b><span class="history-group-meta">${s.n} batalha${s.n===1?'':'s'}</span></div><div class="history-group-summary"><span class="badge neutral">${s.w} V</span><span class="badge neutral">${s.l} D</span><span class="badge neutral">${s.rate}%</span><span class="badge neutral">PF ${s.pf}</span><span class="badge neutral">PS ${s.ps}</span></div></td></tr>`;
+}
+
 function historyRowHtml(b){
   return `<tr><td><span class="badge ${normalizeMode(b)==='Treino'?'training':'competitive'}">${normalizeMode(b)}</span></td><td>${esc(b.tournament)}</td><td>${esc(b.game)}</td><td>${b.round||''}</td><td><b>${esc(combo(b))}</b></td><td>${esc(b.opponent)}</td><td><span class="badge ${b.result==='Vitória'?'win':'loss'}">${esc(b.result)}</span></td><td>${esc(b.finish)}</td><td>${b.points??0}</td><td>${esc(b.notes)}</td><td><div class="toolbar"><button class="btn" style="padding:6px 8px" onclick="startEditBattle('${b.id}')">Editar</button><button class="btn danger" style="padding:6px 8px" onclick="removeBattle('${b.id}')">Excluir</button></div></td></tr>`;
 }
@@ -755,9 +891,9 @@ function editBattleRowHtml(b){
     <div class="field"><label>Jogo</label><input id="edit-game" value="${esc(b.game)}"></div>
     <div class="field"><label>Round</label><input id="edit-round" type="number" min="1" value="${b.round||1}"></div>
     <div class="field"><label>Lock Chip</label><input id="edit-lockChip" list="dl-lock" value="${esc(b.lockChip)}"></div>
-    <div class="field"><label>Blade</label><input id="edit-blade" list="dl-blade" value="${esc(b.blade)}"></div>
+    <div class="field"><label>Blade</label><input id="edit-blade" list="dl-blade" value="${esc(b.blade)}"></div><div class="field"><label>Over Blade</label><input id="edit-overBlade" list="dl-over" value="${esc(b.overBlade||'')}"></div><div class="field"><label>Metal Blade</label><input id="edit-metalBlade" list="dl-metal" value="${esc(b.metalBlade||'')}"></div>
     <div class="field"><label>Assist Blade</label><input id="edit-assistBlade" list="dl-assist" value="${esc(b.assistBlade)}"></div>
-    <div class="field"><label>Ratchet</label><input id="edit-ratchet" list="dl-ratchet" value="${esc(b.ratchet)}"></div>
+    <div class="field"><label>Ratchet</label><input id="edit-ratchet" list="dl-ratchet" value="${esc(b.ratchet)}" placeholder="Deixe vazio para Sem Ratchet"></div>
     <div class="field"><label>Bit</label><input id="edit-bit" list="dl-bit" value="${esc(b.bit)}"></div>
     <div class="field w6"><label>Adversário / Combo</label><input id="edit-opponent" value="${esc(b.opponent)}"></div>
     <div class="field"><label>Resultado</label><select id="edit-result"><option value="Vitória"${b.result==='Vitória'?' selected':''}>Vitória</option><option value="Derrota"${b.result==='Derrota'?' selected':''}>Derrota</option></select></div>
@@ -770,18 +906,32 @@ function editBattleRowHtml(b){
 }
 function renderHistory(){
   const rows=filtered();
-  $('historyBody').innerHTML=rows.length?rows.map(b=>editingBattleId===b.id?editBattleRowHtml(b):historyRowHtml(b)).join(''):`<tr><td colspan="11" class="empty">Nenhum registro encontrado.</td></tr>`;
+  if(!rows.length){$('historyBody').innerHTML=`<tr><td colspan="11" class="empty">Nenhum registro encontrado.</td></tr>`;return}
+  const competitive=rows.filter(b=>normalizeMode(b)==='Competitiva');
+  const training=rows.filter(b=>normalizeMode(b)==='Treino');
+  const groups=new Map();
+  competitive.forEach(b=>{const n=tournamentGroupName(b);if(!groups.has(n))groups.set(n,[]);groups.get(n).push(b)});
+  let html='';
+  groups.forEach((group,name)=>{
+    html+=historyGroupHeader(name,group);
+    html+=group.map(b=>editingBattleId===b.id?editBattleRowHtml(b):historyRowHtml(b)).join('');
+  });
+  if(training.length){
+    html+=historyGroupHeader('Treinos',training);
+    html+=training.map(b=>editingBattleId===b.id?editBattleRowHtml(b):historyRowHtml(b)).join('');
+  }
+  $('historyBody').innerHTML=html;
 }
 function startEditBattle(id){editingBattleId=id;renderHistory();setTimeout(()=>{const r=document.querySelector('.edit-row');if(r)r.scrollIntoView({behavior:'smooth',block:'center'})},0)}
 function cancelEditBattle(){editingBattleId=null;renderHistory()}
 function saveEditedBattle(id){
   const idx=data.findIndex(x=>x.id===id); if(idx<0)return;
-  const blade=$('edit-blade').value.trim(),ratchet=$('edit-ratchet').value.trim(),bit=$('edit-bit').value.trim();
+  const blade=$('edit-blade').value.trim(),ratchetRaw=$('edit-ratchet').value.trim(),ratchet=ratchetRaw.toLocaleLowerCase('pt-BR')==='sem ratchet'?'':ratchetRaw,bit=$('edit-bit').value.trim();
   if(!blade){alert('Informe a Blade.');return}
-  if(!ratchet||!bit){alert('Informe Ratchet e Bit.');return}
+  if(!bit){alert('Informe o Bit. O Ratchet pode ficar vazio para indicar Sem Ratchet.');return}
   const result=$('edit-result').value,finish=$('edit-finish').value;
   let points=+$('edit-points').value;if(!Number.isFinite(points))points=pointFor(result,finish);
-  data[idx]={...data[idx],mode:$('edit-mode').value,tournament:$('edit-tournament').value.trim(),game:$('edit-game').value.trim(),round:+$('edit-round').value||1,lockChip:$('edit-lockChip').value.trim(),blade,assistBlade:$('edit-assistBlade').value.trim(),ratchet,bit,opponent:$('edit-opponent').value.trim(),result,finish,points,notes:$('edit-notes').value.trim(),editedAt:new Date().toISOString()};
+  data[idx]={...data[idx],mode:$('edit-mode').value,tournament:$('edit-tournament').value.trim(),game:$('edit-game').value.trim(),round:+$('edit-round').value||1,lockChip:$('edit-lockChip').value.trim(),blade,overBlade:$('edit-overBlade')?.value.trim()||'',metalBlade:$('edit-metalBlade')?.value.trim()||'',assistBlade:$('edit-assistBlade').value.trim(),ratchet,bit,opponent:$('edit-opponent').value.trim(),result,finish,points,notes:$('edit-notes').value.trim(),editedAt:new Date().toISOString()};
   save();editingBattleId=null;renderAll();
 }
 function removeBattle(id){if(confirm('Excluir esta batalha?')){data=data.filter(x=>x.id!==id);if(editingBattleId===id)editingBattleId=null;save();renderAll()}}
@@ -944,10 +1094,128 @@ function renderComboRanking(){
   }).join(''):`<tr><td colspan="11" class="empty">Nenhum combo atende ao filtro de batalhas mínimas.</td></tr>`;
 }
 
-function renderStats(){const ds=scopedData();renderKpis('statsKpis',ds);refreshMatchupFilters();renderMatchupRanking();refreshOpponentNames();renderOpponentRanking();refreshComboNames();renderComboRanking();let wf={},lf={};ds.forEach(b=>{let o=b.result==='Vitória'?wf:lf;o[b.finish]=(o[b.finish]||0)+1});bars('winFinish',wf,ds.filter(x=>x.result==='Vitória').length);bars('lossFinish',lf,ds.filter(x=>x.result==='Derrota').length);performance('bladeStats','blade');performance('ratchetStats','ratchet');performance('bitStats','bit');renderAuxPerformance();refreshPieceNames();renderPieceRanking()}
-function renderAll(){renderKpis('quickKpis');renderHistory();renderStats();}
+
+function standardFinishPoints(finish){
+  return ({'Spin Finish':1,'Over Finish':2,'Burst Finish':2,'Extreme Finish':3,'Penalização':1})[finish]??0;
+}
+function pointsScoredByBattle(b){
+  return b.result==='Vitória' ? (+b.points||standardFinishPoints(b.finish)) : (+b.points||0);
+}
+function pointsConcededByBattle(b){
+  return b.result==='Derrota' ? standardFinishPoints(b.finish) : 0;
+}
+function tournamentNames(){
+  const m={};
+  data.forEach(b=>{
+    const name=String(b.tournament||'').trim();
+    if(!name)return;
+    m[name]=(m[name]||0)+1;
+  });
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR'));
+}
+function refreshTournamentFilter(){
+  const rows=tournamentNames(),prev=$('tournamentStatsFilter')?.value||'';
+  const sel=$('tournamentStatsFilter');
+  if(!sel)return;
+  sel.innerHTML=rows.length
+    ? rows.map(([name,n])=>`<option value="${esc(name)}">${esc(name)} — ${n} batalha${n===1?'':'s'}</option>`).join('')
+    : '<option value="">Nenhum torneio registrado</option>';
+  if(rows.some(([name])=>name===prev))sel.value=prev;
+  renderTournamentStats();
+}
+function selectedTournamentData(){
+  const name=$('tournamentStatsFilter')?.value||'';
+  const mode=$('tournamentModeFilter')?.value||'all';
+  return data.filter(b=>String(b.tournament||'').trim()===name&&(mode==='all'||normalizeMode(b)===mode));
+}
+function tournamentComboRows(ds){
+  const m={};
+  ds.forEach(b=>{
+    const key=comboKey(b);
+    if(!key)return;
+    if(!m[key])m[key]={key,name:comboLabelFromKey(key),n:0,w:0,l:0,pf:0,ps:0,finish:{}};
+    const x=m[key];
+    x.n++; x.pf+=pointsScoredByBattle(b); x.ps+=pointsConcededByBattle(b);
+    if(b.result==='Vitória')x.w++; else if(b.result==='Derrota')x.l++;
+    const f=b.finish||'Sem tipo';x.finish[f]??={w:0,l:0};
+    if(b.result==='Vitória')x.finish[f].w++;else if(b.result==='Derrota')x.finish[f].l++;
+  });
+  return Object.values(m);
+}
+function tournamentOpponentRows(ds){
+  const m={};
+  ds.forEach(b=>{
+    const name=String(b.opponent||'').trim()||'Não informado';
+    if(!m[name])m[name]={name,n:0,w:0,l:0,pf:0,ps:0};
+    const x=m[name];x.n++;x.pf+=pointsScoredByBattle(b);x.ps+=pointsConcededByBattle(b);
+    if(b.result==='Vitória')x.w++;else if(b.result==='Derrota')x.l++;
+  });
+  return Object.values(m);
+}
+function renderTournamentStats(){
+  const ds=selectedTournamentData();
+  renderTournamentCharts(ds);
+  const w=ds.filter(x=>x.result==='Vitória').length,l=ds.filter(x=>x.result==='Derrota').length,n=ds.length;
+  const pf=ds.reduce((s,b)=>s+pointsScoredByBattle(b),0),ps=ds.reduce((s,b)=>s+pointsConcededByBattle(b),0);
+  const rate=n?Math.round(w/n*100):0,saldo=pf-ps;
+  const vals=[['Batalhas',n,''],['Vitórias',w,'winText'],['Derrotas',l,'lossText'],['Aproveitamento',rate+'%',''],['Pontos feitos',pf,'winText'],['Pontos sofridos',ps,'lossText'],['Saldo',(saldo>0?'+':'')+saldo,saldo>=0?'winText':'lossText']];
+  $('tournamentKpis').innerHTML=vals.map(([l,n,c])=>`<div class="kpi"><div class="n ${c}">${n}</div><div class="l">${l}</div></div>`).join('');
+
+  const cell=(x,f)=>`${x.finish[f]?.w||0} / ${x.finish[f]?.l||0}`;
+  const combos=tournamentComboRows(ds).sort((a,b)=>((b.w/b.n)-(a.w/a.n))||(b.pf-b.ps)-(a.pf-a.ps)||(b.n-a.n));
+  $('tournamentComboBody').innerHTML=combos.length?combos.map(x=>{
+    const saldo=x.pf-x.ps;
+    return `<tr><td><b>${esc(x.name)}</b></td><td>${x.n}</td><td class="winText">${x.w}</td><td class="lossText">${x.l}</td><td><b>${Math.round(x.w/x.n*100)}%</b></td><td>${x.pf}</td><td>${x.ps}</td><td class="${saldo>=0?'winText':'lossText'}"><b>${saldo>0?'+':''}${saldo}</b></td><td>${cell(x,'Spin Finish')}</td><td>${cell(x,'Over Finish')}</td><td>${cell(x,'Burst Finish')}</td><td>${cell(x,'Extreme Finish')}</td></tr>`;
+  }).join(''):'<tr><td colspan="12" class="empty">Nenhuma batalha registrada para este evento.</td></tr>';
+
+  const opponents=tournamentOpponentRows(ds).sort((a,b)=>((b.w/b.n)-(a.w/a.n))||(b.n-a.n));
+  $('tournamentOpponentBody').innerHTML=opponents.length?opponents.map(x=>{
+    const saldo=x.pf-x.ps;
+    return `<tr><td><b>${esc(x.name)}</b></td><td>${x.n}</td><td class="winText">${x.w}</td><td class="lossText">${x.l}</td><td><b>${Math.round(x.w/x.n*100)}%</b></td><td>${x.pf}</td><td>${x.ps}</td><td class="${saldo>=0?'winText':'lossText'}"><b>${saldo>0?'+':''}${saldo}</b></td></tr>`;
+  }).join(''):'<tr><td colspan="8" class="empty">Nenhum adversário registrado para este evento.</td></tr>';
+}
+
+
+function renderSimpleBars(target,rows,{max=null,suffix='',top=10}={}){
+  const el=$(target);if(!el)return;
+  const list=(rows||[]).slice(0,top);
+  if(!list.length){el.innerHTML='<div class="chart-empty">Sem dados suficientes.</div>';return}
+  const m=max??Math.max(...list.map(x=>+x.value||0),1);
+  el.innerHTML=list.map(x=>{
+    const v=+x.value||0,p=m?Math.max(0,Math.min(100,v/m*100)):0;
+    return `<div class="chart-row"><div class="chart-label" title="${esc(x.label)}">${esc(x.label)}</div><div class="chart-track"><div class="chart-fill" style="width:${p}%"></div></div><div class="chart-value">${v}${suffix}</div></div>`;
+  }).join('');
+}
+function renderBattleCharts(){
+  const ds=scopedData();
+  const w=ds.filter(x=>x.result==='Vitória').length,l=ds.filter(x=>x.result==='Derrota').length;
+  renderSimpleBars('chartWinLoss',[{label:'Vitórias',value:w},{label:'Derrotas',value:l}],{top:2});
+
+  const finish={};
+  ds.forEach(b=>{const f=b.finish||'Sem tipo';finish[f]=(finish[f]||0)+1});
+  renderSimpleBars('chartFinishes',Object.entries(finish).map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value),{top:8});
+
+  const combos=comboRows().sort((a,b)=>b.n-a.n);
+  renderSimpleBars('chartCombosUsed',combos.map(x=>({label:x.label||comboLabelFromKey(x.key),value:x.n})),{top:10});
+
+  const wr=comboRows().filter(x=>x.n>0).map(x=>({label:x.label||comboLabelFromKey(x.key),value:Math.round(x.w/x.n*100),n:x.n}))
+    .sort((a,b)=>b.value-a.value||b.n-a.n);
+  renderSimpleBars('chartComboWinrate',wr,{max:100,suffix:'%',top:10});
+}
+function renderTournamentCharts(ds){
+  const rows=tournamentComboRows(ds).sort((a,b)=>b.n-a.n);
+  const pts=[];
+  rows.forEach(x=>{pts.push({label:(x.name||comboLabelFromKey(x.key))+' — PF',value:x.pf});pts.push({label:(x.name||comboLabelFromKey(x.key))+' — PS',value:x.ps})});
+  renderSimpleBars('chartTournamentPoints',pts,{top:20});
+  const rates=rows.map(x=>({label:x.name||comboLabelFromKey(x.key),value:x.n?Math.round(x.w/x.n*100):0,n:x.n}))
+    .sort((a,b)=>b.value-a.value||b.n-a.n);
+  renderSimpleBars('chartTournamentWinrate',rates,{max:100,suffix:'%',top:10});
+}
+
+function renderStats(){const ds=scopedData();renderKpis('statsKpis',ds);renderBattleCharts();refreshMatchupFilters();renderMatchupRanking();refreshOpponentNames();renderOpponentRanking();refreshComboNames();renderComboRanking();let wf={},lf={};ds.forEach(b=>{let o=b.result==='Vitória'?wf:lf;o[b.finish]=(o[b.finish]||0)+1});bars('winFinish',wf,ds.filter(x=>x.result==='Vitória').length);bars('lossFinish',lf,ds.filter(x=>x.result==='Derrota').length);performance('bladeStats','blade');performance('ratchetStats','ratchet');performance('bitStats','bit');renderAuxPerformance();refreshPieceNames();renderPieceRanking()}
+function renderAll(){renderKpis('quickKpis');renderHistory();renderStats();refreshTournamentFilter();}
 function clearForm(){
-['lockChip','blade','assistBlade','ratchet','bit'].forEach(type=>{
+['lockChip','blade','overBlade','metalBlade','assistBlade','ratchet','bit'].forEach(type=>{
   const s=$(type+'Select'),m=$(type+'Manual');
   if(s)s.value=''; if(m){m.value='';m.classList.add('hidden');}
 });
@@ -957,12 +1225,12 @@ $('round').value=(+($('round').value||0))+1;currentResult='Vitória';$('finish')
 function addBattle(){
 const blade=selectPieceValue('blade'),ratchet=selectPieceValue('ratchet'),bit=selectPieceValue('bit');
 if(!blade){alert('Selecione ou informe a Blade.');return}
-if(!ratchet||!bit){alert('Selecione ou informe Ratchet e Bit.');return}
-const b={id:'b-'+Date.now(),createdAt:new Date().toISOString(),mode:$('battleMode').value,tournament:$('tournament').value.trim(),game:$('game').value.trim(),round:+$('round').value||1,lockChip:selectPieceValue('lockChip'),blade,assistBlade:selectPieceValue('assistBlade'),ratchet,bit,opponent:$('opponent').value.trim(),result:currentResult,finish:$('finish').value,points:pointFor(currentResult,$('finish').value),notes:$('notes').value.trim(),source:'Aplicativo'};data.push(b);save();refreshComboQuickMenus();$('saveMsg').textContent='Batalha salva ✓';setTimeout(()=>$('saveMsg').textContent='',1800);clearForm();renderAll();}
+if(!bit){alert('Selecione ou informe o Bit.');return}
+const b={id:'b-'+Date.now(),createdAt:new Date().toISOString(),mode:$('battleMode').value,tournament:$('tournament').value.trim(),game:$('game').value.trim(),round:+$('round').value||1,lockChip:selectPieceValue('lockChip'),blade,overBlade:selectPieceValue('overBlade'),metalBlade:selectPieceValue('metalBlade'),assistBlade:selectPieceValue('assistBlade'),ratchet,bit,opponent:$('opponent').value.trim(),result:currentResult,finish:$('finish').value,points:pointFor(currentResult,$('finish').value),notes:$('notes').value.trim(),source:'Aplicativo'};data.push(b);save();refreshComboQuickMenus();$('saveMsg').textContent='Batalha salva ✓';setTimeout(()=>$('saveMsg').textContent='',1800);clearForm();renderAll();}
 function dl(name,content,type){const blob=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function csv(){const cols=['mode','tournament','game','round','lockChip','blade','assistBlade','ratchet','bit','opponent','result','finish','points','notes'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';return '\ufeff'+[cols.join(';'),...data.map(b=>cols.map(c=>q(b[c])).join(';'))].join('\r\n')}
 function init(){load();loadCollection();loadFavoriteCombos();loadOpponentPresets();refreshBattleDatalists();bindPieceDropdowns();renderPieces();renderCollection();setTimeout(()=>hydratePieceImages($('tab-pieces')),0);renderOpponentPresets();refreshOpponentPresetMenu();renderFavoriteCombos();refreshComboQuickMenus();renderAll();updateResultUI();updateFavoritePreview();
- document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');['new','history','stats','pieces'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==btn.dataset.tab));if(btn.dataset.tab==='history')renderHistory();if(btn.dataset.tab==='stats')renderStats()});
+ document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');['new','history','stats','tournaments','pieces'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==btn.dataset.tab));if(btn.dataset.tab==='history')renderHistory();if(btn.dataset.tab==='stats')renderStats();if(btn.dataset.tab==='tournaments')refreshTournamentFilter()});
  
  document.querySelectorAll('[data-add-piece]').forEach(btn=>btn.onclick=()=>{
    const type=btn.dataset.addPiece;
@@ -985,8 +1253,8 @@ $('opponentPresetSelect').onchange=()=>{const i=+$('opponentPresetSelect').value
 $('saveOpponentPreset').onclick=saveOpponentPreset;
 $('saveCurrentOpponentPreset').onclick=saveOpponentPresetFromForm;
 $('saveFavoriteCombo').onclick=saveCurrentFavorite;
-['lockChipSelect','bladeSelect','assistBladeSelect','ratchetSelect','bitSelect','lockChipManual','bladeManual','assistBladeManual','ratchetManual','bitManual'].forEach(id=>{const e=$(id);if(e)e.addEventListener('input',updateFavoritePreview)});
-$('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterMode','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('statsScope').onchange=renderStats;$('matchupUserComboFilter').onchange=renderMatchupDetail;$('matchupOpponentFilter').onchange=renderMatchupDetail;$('matchupMinBattles').onchange=renderMatchupRanking;$('opponentComboFilter').onchange=renderOpponentDetail;$('opponentMinBattles').onchange=renderOpponentRanking;$('comboNameFilter').onchange=renderComboDetail;$('comboMinBattles').onchange=renderComboRanking;$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify({battles:data,collection,favoriteCombos,opponentPresets},null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);const battles=Array.isArray(v)?v:v.battles;if(!Array.isArray(battles))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=battles;if(v&&v.collection){COLLECTION_TYPES.forEach(k=>collection[k]=Array.isArray(v.collection[k])?v.collection[k]:[]);saveCollection();renderCollection();refreshBattleDatalists();}if(v&&Array.isArray(v.favoriteCombos)){favoriteCombos=v.favoriteCombos;saveFavoriteCombos();renderFavoriteCombos();refreshComboQuickMenus();}if(v&&Array.isArray(v.opponentPresets)){opponentPresets=v.opponentPresets;saveOpponentPresets();renderOpponentPresets();refreshOpponentPresetMenu();}save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
+['lockChipSelect','bladeSelect','overBladeSelect','metalBladeSelect','assistBladeSelect','ratchetSelect','bitSelect','lockChipManual','bladeManual','overBladeManual','metalBladeManual','assistBladeManual','ratchetManual','bitManual'].forEach(id=>{const e=$(id);if(e)e.addEventListener('input',updateFavoritePreview)});
+$('winBtn').onclick=()=>{currentResult='Vitória';updateResultUI()};$('lossBtn').onclick=()=>{currentResult='Derrota';updateResultUI()};$('finish').onchange=updateResultUI;$('saveBtn').onclick=addBattle;$('clearBtn').onclick=clearForm;['search','filterMode','filterResult','filterFinish'].forEach(x=>$(x).addEventListener('input',renderHistory));$('tournamentStatsFilter').onchange=renderTournamentStats;$('tournamentModeFilter').onchange=renderTournamentStats;$('statsScope').onchange=renderStats;$('matchupUserComboFilter').onchange=renderMatchupDetail;$('matchupOpponentFilter').onchange=renderMatchupDetail;$('matchupMinBattles').onchange=renderMatchupRanking;$('opponentComboFilter').onchange=renderOpponentDetail;$('opponentMinBattles').onchange=renderOpponentRanking;$('comboNameFilter').onchange=renderComboDetail;$('comboMinBattles').onchange=renderComboRanking;$('pieceTypeFilter').onchange=refreshPieceNames;$('pieceNameFilter').onchange=renderPieceDetail;$('pieceRankingType').onchange=renderPieceRanking;$('exportCsv').onclick=()=>dl('beyblade_x_batalhas.csv',csv(),'text/csv;charset=utf-8');$('exportJson').onclick=()=>dl('beyblade_x_backup.json',JSON.stringify({battles:data,collection,favoriteCombos,opponentPresets},null,2),'application/json');$('importJson').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const v=JSON.parse(rd.result);const battles=Array.isArray(v)?v:v.battles;if(!Array.isArray(battles))throw 0;if(confirm('Substituir o histórico atual pelo backup selecionado?')){data=battles;if(v&&v.collection){COLLECTION_TYPES.forEach(k=>collection[k]=Array.isArray(v.collection[k])?v.collection[k]:[]);saveCollection();renderCollection();refreshBattleDatalists();}if(v&&Array.isArray(v.favoriteCombos)){favoriteCombos=v.favoriteCombos;saveFavoriteCombos();renderFavoriteCombos();refreshComboQuickMenus();}if(v&&Array.isArray(v.opponentPresets)){opponentPresets=v.opponentPresets;saveOpponentPresets();renderOpponentPresets();refreshOpponentPresetMenu();}save();renderAll();alert('Backup importado.')}}catch(_){alert('Arquivo JSON inválido.')}};rd.readAsText(f);e.target.value=''};
 }
 init();
 </script>
