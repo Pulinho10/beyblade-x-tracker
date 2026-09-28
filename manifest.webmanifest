@@ -1,26 +1,9 @@
 {
-  "name": "Beyblade X Battle Tracker — Geral",
-  "short_name": "Beyblade X",
-  "description": "Registro de partidas competitivas e batalhas de treino com estatísticas separadas.",
-  "start_url": "./index.html",
-  "scope": "./",
+  "name": "Panelão Brasileiro de Beyblade X 2026",
+  "short_name": "Panelão BX 2026",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#0b1220",
-  "theme_color": "#0b1220",
-  "orientation": "portrait-primary",
-  "lang": "pt-BR",
-  "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+  "background_color": "#090d16",
+  "theme_color": "#111827",
+  "description": "Registro oficial de partidas, placares, decks, arbitragem e validações do Panelão Brasileiro de Beyblade X 2026."
 }
